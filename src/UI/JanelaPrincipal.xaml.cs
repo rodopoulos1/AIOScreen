@@ -993,6 +993,9 @@ public partial class JanelaPrincipal : Window
             if (estado.Mensagem.Length > 0 && estado.Mensagem != "Ligado")
                 Rodape(estado.Mensagem);
 
+            // A LUZ só é reescrita quando muda de verdade: reescrever a cada
+            // leitura faria o texto piscar.
+            //
             // Reage nas DUAS direções. Antes só tratava a queda, então o app
             // reconectava por dentro e a interface continuava dizendo
             // "desconectada", com o botão de aplicar morto.
@@ -1001,8 +1004,22 @@ public partial class JanelaPrincipal : Window
             {
                 Estado(estado.Ligado,
                        estado.Ligado ? T("Tela em {0}", estado.Porta ?? "?") : T("Tela reiniciando..."));
-                AtualizarBotoes();
             }
+
+            // Os BOTÕES são revistos SEMPRE, fora do if acima.
+            //
+            // Estavam presos à mudança da luz, e isso os deixava mortos numa
+            // sequência banal: aplicar um tema faz o painel re-enumerar o USB, e
+            // Servico.Ligado não é um campo — ele pergunta ao barramento se a
+            // porta ainda existe. Trocar de tema logo depois chamava
+            // AtualizarBotoes() bem nesse intervalo, e o botão nascia desativado.
+            // Quando a porta voltava, a luz JÁ estava em "ligado", o if dava
+            // falso, e ninguém mais revia o botão: ele ficava inclicável com a
+            // tela conectada na cara da pessoa.
+            //
+            // Rever botão é barato e o serviço reporta de tempos em tempos, então
+            // qualquer estado errado se conserta sozinho no próximo relatório.
+            AtualizarBotoes();
         });
     }
 
