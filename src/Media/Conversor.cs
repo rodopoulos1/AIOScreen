@@ -1,14 +1,14 @@
 using System.Diagnostics;
 using System.IO;
-using RodoCooler.Idiomas;
-using RodoCooler.Nucleo;
+using AIOScreen.Localization;
+using AIOScreen.Core;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace RodoCooler.Midia;
+namespace AIOScreen.Media;
 
 public sealed record Quadro(Image<Rgba32> Imagem, int AtrasoMs);
 

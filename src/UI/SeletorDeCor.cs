@@ -3,9 +3,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using RodoCooler.Idiomas;
+using AIOScreen.Localization;
 
-namespace RodoCooler.UI;
+namespace AIOScreen.UI;
 
 /// <summary>
 /// Escolha de cor livre, em matiz, saturação e brilho.

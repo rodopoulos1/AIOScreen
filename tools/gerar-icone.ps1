@@ -4,7 +4,7 @@
     Rodar só quando o desenho mudar; o .ico fica versionado junto do projeto.
     Precisa do pwsh 7 (o 5.1 não lê este arquivo por causa dos acentos).
 
-        pwsh -File ferramentas/gerar-icone.ps1
+        pwsh -File tools/gerar-icone.ps1
 
     O desenho é o mesmo arco do painel: anel vermelho aberto embaixo e um núcleo
     claro no meio. Em 16 px some tudo menos o anel e o ponto — por isso não tem

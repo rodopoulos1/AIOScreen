@@ -1,7 +1,7 @@
 using System.Buffers.Binary;
 using System.Text;
 
-namespace RodoCooler.Nucleo;
+namespace AIOScreen.Core;
 
 /// <summary>
 /// Montagem dos pacotes que a tela do cooler entende.

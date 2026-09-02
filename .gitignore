@@ -1,7 +1,8 @@
 # Build
 bin/
 obj/
-publicado/
+published/
+installer-output/
 *.user
 *.suo
 
@@ -9,7 +10,6 @@ publicado/
 previa/
 autoteste.txt
 temp/
-publicado-instalador/
 
 # Editores
 .vs/

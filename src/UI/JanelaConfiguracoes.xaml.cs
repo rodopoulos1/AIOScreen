@@ -3,10 +3,10 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
-using RodoCooler.Midia;
-using RodoCooler.Nucleo;
+using AIOScreen.Media;
+using AIOScreen.Core;
 
-namespace RodoCooler.UI;
+namespace AIOScreen.UI;
 
 public partial class JanelaConfiguracoes : Window
 {
@@ -33,16 +33,16 @@ public partial class JanelaConfiguracoes : Window
         // botão que resolve. Aviso sem ação ao lado é só barulho.
         EstadoDaTemperatura.Text = Autostart.Elevado()
             ? ""
-            : Idiomas.Idioma.T("Agora o app está sem privilégio, então a temperatura aparece como \"--\". Uso, frequência e memória funcionam normalmente.");
+            : Localization.Idioma.T("Agora o app está sem privilégio, então a temperatura aparece como \"--\". Uso, frequência e memória funcionam normalmente.");
         AplicarAoAbrir.IsChecked = _cfg.AplicarAoAbrir;
         MinimizarAoFechar.IsChecked = _cfg.MinimizarAoFechar;
 
         MontarGpus();
         MontarPortas();
         MontarIdiomas();
-        Idiomas.Traduzir.Janela(this);
-        Idiomas.Traduzir.Mudou += AoTrocarIdioma;
-        Closed += (_, _) => Idiomas.Traduzir.Mudou -= AoTrocarIdioma;
+        Localization.Traduzir.Janela(this);
+        Localization.Traduzir.Mudou += AoTrocarIdioma;
+        Closed += (_, _) => Localization.Traduzir.Mudou -= AoTrocarIdioma;
 
         LimiteQuente.Value = _cfg.LimiteQuente;
         ValorLimite.Text = $"{_cfg.LimiteQuente:0} °C";
@@ -66,12 +66,12 @@ public partial class JanelaConfiguracoes : Window
     private void MontarGpus()
     {
         EscolhaDeGpu.Items.Clear();
-        EscolhaDeGpu.Items.Add(Idiomas.Idioma.T("Automático — a de maior uso"));
+        EscolhaDeGpu.Items.Add(Localization.Idioma.T("Automático — a de maior uso"));
         foreach (var g in _gpus) EscolhaDeGpu.Items.Add(g);
         EscolhaDeGpu.SelectedIndex = Math.Max(0, _gpus.ToList().IndexOf(_cfg.GpuPreferida) + 1);
 
         if (_gpus.Count == 0)
-            DicaDeGpu.Text = Idiomas.Idioma.T("Nenhuma placa detectada. Sem privilégio de administrador o driver de sensores não carrega, e a lista fica vazia.");
+            DicaDeGpu.Text = Localization.Idioma.T("Nenhuma placa detectada. Sem privilégio de administrador o driver de sensores não carrega, e a lista fica vazia.");
     }
 
     /// <summary>Reescreve o que esta janela monta por código, depois de trocar o idioma.</summary>
@@ -87,7 +87,7 @@ public partial class JanelaConfiguracoes : Window
 
         EstadoDaTemperatura.Text = Autostart.Elevado()
             ? ""
-            : Idiomas.Idioma.T("Agora o app está sem privilégio, então a temperatura aparece como \"--\". Uso, frequência e memória funcionam normalmente.");
+            : Localization.Idioma.T("Agora o app está sem privilégio, então a temperatura aparece como \"--\". Uso, frequência e memória funcionam normalmente.");
 
         MontarGpus();
         MontarPortas();
@@ -100,7 +100,7 @@ public partial class JanelaConfiguracoes : Window
     private void MontarPortas()
     {
         EscolhaDePorta.Items.Clear();
-        EscolhaDePorta.Items.Add(Idiomas.Idioma.T("Automático — procurar pelo hardware"));
+        EscolhaDePorta.Items.Add(Localization.Idioma.T("Automático — procurar pelo hardware"));
         foreach (var p in Painel.ListarPortas()) EscolhaDePorta.Items.Add(p);
 
         int i = _cfg.PortaFixa is null ? 0 : Painel.ListarPortas().ToList().IndexOf(_cfg.PortaFixa) + 1;
@@ -108,8 +108,8 @@ public partial class JanelaConfiguracoes : Window
 
         var achada = Painel.ProcurarPorta();
         DicaDePorta.Text = achada is not null
-            ? Idiomas.Idioma.T("A tela do cooler está em {0}. O automático a encontra pelo identificador de hardware, então continua funcionando se o número da porta mudar.", achada)
-            : Idiomas.Idioma.T("Não encontrei a tela no barramento. Confira o cabo USB do bloco da bomba.");
+            ? Localization.Idioma.T("A tela do cooler está em {0}. O automático a encontra pelo identificador de hardware, então continua funcionando se o número da porta mudar.", achada)
+            : Localization.Idioma.T("Não encontrei a tela no barramento. Confira o cabo USB do bloco da bomba.");
     }
 
     // ------------------------------------------------------------ eventos
@@ -149,7 +149,7 @@ public partial class JanelaConfiguracoes : Window
         _cfg.PortaFixa = EscolhaDePorta.SelectedIndex <= 0
             ? null
             : EscolhaDePorta.SelectedItem?.ToString();
-        TextoRodape.Text = Idiomas.Idioma.T("A porta muda na próxima reconexão.");
+        TextoRodape.Text = Localization.Idioma.T("A porta muda na próxima reconexão.");
         Salvar();
     }
 
@@ -168,9 +168,9 @@ public partial class JanelaConfiguracoes : Window
         _idiomas = new List<string> { "" };   // vazio = automático
 
         EscolhaDeIdioma.Items.Clear();
-        EscolhaDeIdioma.Items.Add(Idiomas.Idioma.T("Automático (segue o Windows)"));
+        EscolhaDeIdioma.Items.Add(Localization.Idioma.T("Automático (segue o Windows)"));
 
-        foreach (var (codigo, nome) in Idiomas.Idioma.Disponiveis())
+        foreach (var (codigo, nome) in Localization.Idioma.Disponiveis())
         {
             _idiomas.Add(codigo);
             EscolhaDeIdioma.Items.Add(nome);
@@ -192,13 +192,13 @@ public partial class JanelaConfiguracoes : Window
 
         // Vale na hora. Cada elemento guarda o texto original em português, então
         // dá para retraduzir quantas vezes quiser — inclusive voltar ao português.
-        Idiomas.Idioma.Definir(_cfg.Idioma);
+        Localization.Idioma.Definir(_cfg.Idioma);
 
         // Traduz a árvore de TODAS as janelas abertas e, no fim, dispara o
         // Mudou — que é onde cada janela reescreve o que monta por código.
-        Idiomas.Traduzir.TudoQueEstaAberto();
+        Localization.Traduzir.TudoQueEstaAberto();
 
-        TextoRodape.Text = Idiomas.Idioma.T("Idioma trocado.");
+        TextoRodape.Text = Localization.Idioma.T("Idioma trocado.");
     }
 
     private static readonly int[] QuadrosPossiveis = { 1, 4, 8, 16 };
@@ -240,8 +240,8 @@ public partial class JanelaConfiguracoes : Window
     {
         var dlg = new OpenFileDialog
         {
-            Title = Idiomas.Idioma.T("Onde está o ffmpeg"),
-            Filter = Idiomas.Idioma.T("ffmpeg.exe|ffmpeg.exe|Executáveis|*.exe"),
+            Title = Localization.Idioma.T("Onde está o ffmpeg"),
+            Filter = Localization.Idioma.T("ffmpeg.exe|ffmpeg.exe|Executáveis|*.exe"),
         };
         if (dlg.ShowDialog() == true) CaminhoFfmpeg.Text = dlg.FileName;
     }
@@ -251,10 +251,10 @@ public partial class JanelaConfiguracoes : Window
         string c = CaminhoFfmpeg.Text.Trim();
 
         EstadoDoFfmpeg.Text = c.Length == 0
-            ? Idiomas.Idioma.T("Não encontrado. Sem ele, vídeo não abre — imagem e GIF continuam funcionando.")
+            ? Localization.Idioma.T("Não encontrado. Sem ele, vídeo não abre — imagem e GIF continuam funcionando.")
             : File.Exists(c)
-                ? Idiomas.Idioma.T("Encontrado. Vídeo será convertido a 10 quadros por segundo.")
-                : Idiomas.Idioma.T("Esse caminho não existe.");
+                ? Localization.Idioma.T("Encontrado. Vídeo será convertido a 10 quadros por segundo.")
+                : Localization.Idioma.T("Esse caminho não existe.");
     }
 
     private void AoAbrirPasta(object remetente, RoutedEventArgs e)

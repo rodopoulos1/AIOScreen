@@ -1,13 +1,14 @@
 # Le o codigo e responde duas coisas sobre a traducao da interface:
 #
-#     python ferramentas/textos.py extrair    # gera idiomas/pt-BR.json
-#     python ferramentas/textos.py auditar    # lista texto que escapa do tradutor
+#     python tools/textos.py extrair    # gera languages/pt-BR.json
+#     python tools/textos.py auditar    # lista texto que escapa do tradutor
 #
 # A regra do projeto e simples: todo texto que uma pessoa le tem que passar por
 # Idioma.T(...) no C#, ou estar num atributo de texto do XAML. O extrair junta
 # essas duas fontes; o auditar aponta quem ficou de fora.
 #
-# Substitui o extrair-textos.ps1, que casava padroes como `.Text = "..."`. Isso
+# Ancora na CHAMADA do tradutor. A versao anterior casava padroes como
+# `.Text = "..."`. Isso
 # parou de funcionar no instante em que o texto passou a ser traduzido
 # (`.Text = Idioma.T("...")`) — a lista encolheu de 144 para 108 sem nenhum
 # aviso. Aqui a ancora e a CHAMADA do tradutor, entao ela nao tem como
@@ -19,7 +20,7 @@ import re
 import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DESTINO = os.path.join(RAIZ, 'idiomas')
+DESTINO = os.path.join(RAIZ, 'languages')
 
 # So escrevem no console de diagnostico: nunca chegam na tela.
 FORA = ('src/Autoteste.cs', 'src/Previa.cs')
@@ -29,8 +30,8 @@ ATRIBUTOS = ('Text', 'Content', 'ToolTip', 'Title', 'Header')
 # As quatro portas de entrada do tradutor. Rodape e o atalho da janela principal
 # e chama Idioma.T por dentro.
 CHAMADAS = re.compile(
-    r'(?:Idiomas\.Idioma\.(?:T|Marcar)|Idioma\.(?:T|Marcar)'
-    r'|(?<![\w.])T|(?<![\w.])Rodape)\s*\(')
+    r'(?:AIOScreen\.Localization\.Idioma\.(?:T|Marcar)|Localization\.Idioma\.(?:T|Marcar)'
+    r'|Idioma\.(?:T|Marcar)|(?<![\w.])T|(?<![\w.])Rodape)\s*\(')
 
 LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
 
@@ -81,7 +82,7 @@ def arquivos():
         for nome in nomes:
             caminho = os.path.join(pasta, nome)
             rel = os.path.relpath(caminho, RAIZ).replace('\\', '/')
-            if '/Idiomas/' in rel or rel in FORA:
+            if '/Localization/' in rel or rel in FORA:
                 continue
             if nome.endswith('.cs') or nome.endswith('.xaml'):
                 yield caminho, rel

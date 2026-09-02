@@ -3,7 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Forms;
 
-namespace RodoCooler.UI;
+namespace AIOScreen.UI;
 
 /// <summary>
 /// Ícone de bandeja: o app vive ali, como todo programa que sobe com o Windows.

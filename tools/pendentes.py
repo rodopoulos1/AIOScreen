@@ -1,9 +1,9 @@
 # Prepara e fecha o ciclo de traducao.
 #
-#     python ferramentas/pendentes.py listar          # temp/faltando.json
-#     python ferramentas/pendentes.py aplicar         # junta temp/novos-*.json
+#     python tools/pendentes.py listar          # temp/faltando.json
+#     python tools/pendentes.py aplicar         # junta temp/novos-*.json
 #
-# Por que o agente nao edita idiomas/<lang>.json direto: sao 223 chaves, e
+# Por que o agente nao edita languages/<lang>.json direto: sao 223 chaves, e
 # reescrever o arquivo inteiro a mao convida a truncar no meio e a errar escape.
 # Aqui ele so escreve o que e novo, num arquivo separado, e a juncao — que e
 # mecanica — fica com o script.
@@ -13,7 +13,7 @@ import os
 import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-IDIOMAS = os.path.join(RAIZ, 'idiomas')
+IDIOMAS = os.path.join(RAIZ, 'languages')
 TEMP = os.path.join(RAIZ, 'temp')
 
 

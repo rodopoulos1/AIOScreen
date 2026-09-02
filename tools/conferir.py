@@ -1,6 +1,6 @@
 # Confere os arquivos de idioma contra a origem.
 #
-#     python ferramentas/conferir.py
+#     python tools/conferir.py
 #
 # Nao julga a qualidade da traducao — julga o que quebra o programa ou salta aos
 # olhos:
@@ -20,7 +20,7 @@ import re
 import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-IDIOMAS = os.path.join(RAIZ, 'idiomas')
+IDIOMAS = os.path.join(RAIZ, 'languages')
 
 MARCADOR = re.compile(r'\{(\d+)\}')
 CURINGA = re.compile(r'\*\.[A-Za-z0-9]+')

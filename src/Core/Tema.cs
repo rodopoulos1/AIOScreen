@@ -1,7 +1,7 @@
 using System.Buffers.Binary;
-using RodoCooler.Idiomas;
+using AIOScreen.Localization;
 
-namespace RodoCooler.Nucleo;
+namespace AIOScreen.Core;
 
 /// <summary>
 /// Monta o blob de tema que a tela espera: um bloco de metadados seguido dos

@@ -1,12 +1,12 @@
-using RodoCooler.Idiomas;
-using RodoCooler.Midia;
-using RodoCooler.Sensores;
+using AIOScreen.Localization;
+using AIOScreen.Media;
+using AIOScreen.Sensors;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Processing;
 
-namespace RodoCooler.Nucleo;
+namespace AIOScreen.Core;
 
 public enum Modo
 {

@@ -1,7 +1,7 @@
 using System.IO;
 using System.Text.Json;
 
-namespace RodoCooler.Idiomas;
+namespace AIOScreen.Localization;
 
 /// <summary>
 /// Tradução da interface.
@@ -14,7 +14,7 @@ namespace RodoCooler.Idiomas;
 ///
 /// O preço é que mudar o texto em português quebra a tradução daquela frase.
 /// Aceitável aqui: o português é a fonte da verdade, fica num lugar só, e o
-/// <c>ferramentas/textos.py</c> lista o que ficou sem tradução.
+/// <c>tools/textos.py</c> lista o que ficou sem tradução.
 ///
 /// Sem arquivo para o idioma do sistema, cai no português — nunca em texto
 /// vazio nem em chave crua na tela.
@@ -26,7 +26,9 @@ public static class Idioma
 
     private static Dictionary<string, string> _mapa = new();
 
-    private static string Pasta => Path.Combine(AppContext.BaseDirectory, "idiomas");
+    // O AIOScreen.csproj copia os .json para cá. Se um dos dois mudar de nome
+    // sem o outro, o app fica só em português e nada avisa.
+    private static string Pasta => Path.Combine(AppContext.BaseDirectory, "languages");
 
     /// <summary>Idiomas que têm arquivo, na ordem em que devem aparecer para escolha.</summary>
     public static IReadOnlyList<(string codigo, string nome)> Disponiveis()
@@ -163,7 +165,7 @@ public static class Idioma
     /// nomes, por exemplo. Traduzir na declaração congelaria o idioma escolhido
     /// no arranque, e trocar de idioma depois não teria efeito; então a tradução
     /// fica no <see cref="T(string)"/> da hora de exibir, e este marcador existe
-    /// só para o <c>ferramentas/textos.py</c> achar a frase e pôr no dicionário.
+    /// só para o <c>tools/textos.py</c> achar a frase e pôr no dicionário.
     /// Sem ele a chave nunca entra, e a frase fica em português para sempre.
     /// </remarks>
     public static string Marcar(string portugues) => portugues;

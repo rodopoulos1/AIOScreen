@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace RodoCooler.Idiomas;
+namespace AIOScreen.Localization;
 
 /// <summary>
 /// Traduz uma janela inteira percorrendo os controles dela.

@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.IO;
-using RodoCooler.Idiomas;
+using AIOScreen.Localization;
 
-namespace RodoCooler.UI;
+namespace AIOScreen.UI;
 
 /// <summary>
 /// Faz o app subir sozinho no logon.

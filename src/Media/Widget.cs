@@ -1,7 +1,7 @@
-using RodoCooler.Idiomas;
-using RodoCooler.Sensores;
+using AIOScreen.Localization;
+using AIOScreen.Sensors;
 
-namespace RodoCooler.Midia;
+namespace AIOScreen.Media;
 
 /// <summary>De onde o widget tira o número.</summary>
 public enum Fonte
@@ -165,11 +165,11 @@ public static class Arranjos
     // lista. Traduzir aqui congelaria o idioma do arranque.
     public static readonly string[] Nomes =
     {
-        Idiomas.Idioma.Marcar("Núcleo"),
-        Idiomas.Idioma.Marcar("Duplo"),
-        Idiomas.Idioma.Marcar("Limpo"),
-        Idiomas.Idioma.Marcar("Completo"),
-        Idiomas.Idioma.Marcar("Vazio"),
+        Localization.Idioma.Marcar("Núcleo"),
+        Localization.Idioma.Marcar("Duplo"),
+        Localization.Idioma.Marcar("Limpo"),
+        Localization.Idioma.Marcar("Completo"),
+        Localization.Idioma.Marcar("Vazio"),
     };
 
     public static List<Widget> Montar(int qual) => qual switch

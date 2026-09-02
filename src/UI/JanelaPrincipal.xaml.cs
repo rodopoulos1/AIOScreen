@@ -7,16 +7,16 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Microsoft.Win32;
-using RodoCooler.Midia;
-using RodoCooler.Nucleo;
-using RodoCooler.Sensores;
+using AIOScreen.Media;
+using AIOScreen.Core;
+using AIOScreen.Sensors;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
 
 using Brush = System.Windows.Media.Brush;
 
-namespace RodoCooler.UI;
+namespace AIOScreen.UI;
 
 /// <summary>
 /// A tela inicial: escolher um tema e mandar para o cooler.
@@ -107,9 +107,9 @@ public partial class JanelaPrincipal : Window
 
     private void AoCarregar(object? remetente, RoutedEventArgs e)
     {
-        Idiomas.Traduzir.Janela(this);
-        Idiomas.Traduzir.Mudou += AoTrocarIdioma;
-        Closed += (_, _) => Idiomas.Traduzir.Mudou -= AoTrocarIdioma;
+        Localization.Traduzir.Janela(this);
+        Localization.Traduzir.Mudou += AoTrocarIdioma;
+        Closed += (_, _) => Localization.Traduzir.Mudou -= AoTrocarIdioma;
         _servico.Aplicar(_cfg);
 
         MontarListaDeTemas();
@@ -1022,13 +1022,13 @@ public partial class JanelaPrincipal : Window
     /// frase única, que não existe em dicionário nenhum — e o texto ficaria em
     /// português no meio de uma interface traduzida.
     /// </remarks>
-    private void Rodape(string molde) => TextoRodape.Text = Idiomas.Idioma.T(molde);
+    private void Rodape(string molde) => TextoRodape.Text = Localization.Idioma.T(molde);
 
     private void Rodape(string molde, params object[] valores)
-        => TextoRodape.Text = Idiomas.Idioma.T(molde, valores);
+        => TextoRodape.Text = Localization.Idioma.T(molde, valores);
 
-    private static string T(string molde) => Idiomas.Idioma.T(molde);
-    private static string T(string molde, params object[] v) => Idiomas.Idioma.T(molde, v);
+    private static string T(string molde) => Localization.Idioma.T(molde);
+    private static string T(string molde, params object[] v) => Localization.Idioma.T(molde, v);
 
     // -------------------------------------------------------------- janela
 

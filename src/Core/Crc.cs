@@ -1,4 +1,4 @@
-namespace RodoCooler.Nucleo;
+namespace AIOScreen.Core;
 
 /// <summary>
 /// CRC-16/MODBUS — o verificador que o painel usa.

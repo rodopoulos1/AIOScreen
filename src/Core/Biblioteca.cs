@@ -1,14 +1,14 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using RodoCooler.Idiomas;
-using RodoCooler.Midia;
+using AIOScreen.Localization;
+using AIOScreen.Media;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace RodoCooler.Nucleo;
+namespace AIOScreen.Core;
 
 /// <summary>Um arranjo salvo: a imagem de origem mais tudo que foi ajustado em cima dela.</summary>
 public sealed class Personalizado

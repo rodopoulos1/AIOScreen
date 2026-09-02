@@ -3,7 +3,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace RodoCooler;
+namespace AIOScreen;
 
 public partial class App : Application
 {
@@ -88,11 +88,11 @@ public partial class App : Application
         // dele se dimensiona pela RAM da máquina e, numa de 32 GB, segura
         // centenas de MB para reaproveitar — comportamento certo num serviço,
         // errado num app que fica parado na bandeja.
-        Midia.Conversor.ConfigurarMemoria();
+        Media.Conversor.ConfigurarMemoria();
 
         // Antes de qualquer janela existir: elas se traduzem no Loaded, e o
         // idioma precisa estar decidido até lá.
-        Idiomas.Idioma.Definir(Nucleo.Configuracao.Carregar().Idioma);
+        Localization.Idioma.Definir(Core.Configuracao.Carregar().Idioma);
 
         base.OnStartup(e);
 

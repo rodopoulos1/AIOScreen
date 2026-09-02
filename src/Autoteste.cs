@@ -1,8 +1,8 @@
 using System.Runtime.InteropServices;
 using System.Text;
-using RodoCooler.Nucleo;
+using AIOScreen.Core;
 
-namespace RodoCooler;
+namespace AIOScreen;
 
 /// <summary>
 /// Confere o codificador contra pacotes REAIS capturados do fio.
@@ -16,7 +16,7 @@ namespace RodoCooler;
 /// A saída daqui é prova de verdade: se os bytes gerados forem idênticos aos
 /// que o programa do fabricante mandou, o codificador está certo, ponto.
 ///
-///     RodoCooler.exe --autoteste
+///     AIOScreen.exe --autoteste
 /// </remarks>
 public static class Autoteste
 {

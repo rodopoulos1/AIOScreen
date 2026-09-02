@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using LibreHardwareMonitor.Hardware;
 
-namespace RodoCooler.Sensores;
+namespace AIOScreen.Sensors;
 
 public sealed class Leitura
 {

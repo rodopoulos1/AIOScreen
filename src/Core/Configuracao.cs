@@ -1,9 +1,9 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using RodoCooler.Midia;
+using AIOScreen.Media;
 
-namespace RodoCooler.Nucleo;
+namespace AIOScreen.Core;
 
 /// <summary>
 /// O que o app lembra entre uma abertura e outra.

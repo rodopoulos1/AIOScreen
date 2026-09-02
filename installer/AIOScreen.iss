@@ -6,12 +6,12 @@
 ; antes de compilar.
 ;
 ; Compila com o Inno Setup 6:
-;     "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" instalador\AIOScreen.iss
+;     "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\AIOScreen.iss
 ;
 ; Antes de compilar e preciso ter publicado o app:
-;     dotnet publish -c Release -o publicado
+;     dotnet publish -c Release -o published
 ;
-; O script "ferramentas\gerar-instalador.ps1" faz os dois passos em ordem.
+; O script "tools\gerar-instalador.ps1" faz os dois passos em ordem.
 
 #define Nome      "AIOScreen"
 #define Versao    "1.0.0"
@@ -38,7 +38,7 @@ DisableDirPage=no
 ; momento em que o Windows vai perguntar alguma coisa.
 PrivilegesRequired=admin
 
-OutputDir=..\publicado-instalador
+OutputDir=..\installer-output
 OutputBaseFilename={#Nome}-Setup-{#Versao}
 SetupIconFile=..\src\UI\icone.ico
 UninstallDisplayIcon={app}\{#Executavel}
@@ -78,12 +78,12 @@ Name: "autostart"; Description: "{cm:SubirComWindows}"; GroupDescription: "{cm:S
 Name: "desktopicon"; Description: "{cm:AtalhoNaArea}"; Flags: unchecked
 
 [Files]
-Source: "..\publicado\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
+Source: "..\published\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
   Excludes: "*.pdb,autoteste.txt,previa\*"
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\docs\*"; DestDir: "{app}\docs"; Flags: ignoreversion recursesubdirs
-Source: "..\idiomas\*.json"; DestDir: "{app}\idiomas"; Flags: ignoreversion
+Source: "..\languages\*.json"; DestDir: "{app}\languages"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#Nome}"; Filename: "{app}\{#Executavel}"

@@ -1,8 +1,8 @@
 using System.IO.Ports;
 using System.Management;
-using RodoCooler.Idiomas;
+using AIOScreen.Localization;
 
-namespace RodoCooler.Nucleo;
+namespace AIOScreen.Core;
 
 /// <summary>
 /// A ligação com a tela do cooler.

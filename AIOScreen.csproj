@@ -9,11 +9,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- O namespace interno segue RodoCooler: renomear namespace mexe em todo
-         arquivo sem mudar nada para quem usa. O que o usuário vê é o
-         AssemblyName. -->
     <AssemblyName>AIOScreen</AssemblyName>
-    <RootNamespace>RodoCooler</RootNamespace>
+    <RootNamespace>AIOScreen</RootNamespace>
     <Version>1.0.0</Version>
     <Authors>Rodopoulos</Authors>
     <Product>AIOScreen</Product>
@@ -51,11 +48,11 @@
 
   <ItemGroup>
     <!-- Os arquivos de idioma precisam viajar junto com o executavel: o
-         Idioma.cs os procura em <pasta do exe>\idiomas. Sem isto o app
+         Idioma.cs os procura em <pasta do exe>\languages. Sem isto o app
          instalado fica so em portugues, por mais traducao que exista no
-         repositorio. -->
-    <Content Include="idiomas\*.json" Condition="Exists('idiomas')">
-      <Link>idiomas\%(Filename)%(Extension)</Link>
+         repositorio. O nome da pasta aqui e no Idioma.cs tem que ser o MESMO. -->
+    <Content Include="languages\*.json" Condition="Exists('languages')">
+      <Link>languages\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

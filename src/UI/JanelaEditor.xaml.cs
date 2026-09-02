@@ -5,10 +5,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using RodoCooler.Idiomas;
-using RodoCooler.Midia;
-using RodoCooler.Nucleo;
-using RodoCooler.Sensores;
+using AIOScreen.Localization;
+using AIOScreen.Media;
+using AIOScreen.Core;
+using AIOScreen.Sensors;
 
 using Point = System.Windows.Point;
 using Color = System.Windows.Media.Color;
@@ -16,7 +16,7 @@ using Image = System.Windows.Controls.Image;
 // Aqui Path é forma geométrica, não caminho de arquivo.
 using Path = System.Windows.Shapes.Path;
 
-namespace RodoCooler.UI;
+namespace AIOScreen.UI;
 
 /// <summary>
 /// A mesa de edição: monta o tema arrastando elemento, como num editor de imagem.
@@ -97,7 +97,7 @@ public partial class JanelaEditor : Window
 
         // Depois de montar: os botões da paleta e das formas nascem em código,
         // e não existiriam ainda se a tradução rodasse antes.
-        Idiomas.Traduzir.Janela(this);
+        Localization.Traduzir.Janela(this);
 
         Zoom.Value = _servico.Zoom * 100;
         Escurecer.Value = _servico.Escurecer * 100;
@@ -151,12 +151,12 @@ public partial class JanelaEditor : Window
 
     private void MontarArranjos()
     {
-        for (int i = 0; i < Midia.Arranjos.Nomes.Length; i++)
+        for (int i = 0; i < Media.Arranjos.Nomes.Length; i++)
         {
             int qual = i;
             var b = new Button
             {
-                Content = Idioma.T(Midia.Arranjos.Nomes[i]),
+                Content = Idioma.T(Media.Arranjos.Nomes[i]),
                 Style = (Style)FindResource("BotaoBase"),
                 HorizontalContentAlignment = HorizontalAlignment.Left,
                 Padding = new Thickness(10, 6, 10, 6),
@@ -165,10 +165,10 @@ public partial class JanelaEditor : Window
             };
             b.Click += (_, _) =>
             {
-                _servico.Widgets = Midia.Arranjos.Montar(qual);
+                _servico.Widgets = Media.Arranjos.Montar(qual);
                 _escolhido = null;
                 RedesenharTudo();
-                Rodape.Text = Idioma.T("Arranjo \"{0}\" carregado.", Idioma.T(Midia.Arranjos.Nomes[qual]));
+                Rodape.Text = Idioma.T("Arranjo \"{0}\" carregado.", Idioma.T(Media.Arranjos.Nomes[qual]));
             };
             Arranjos.Items.Add(b);
         }

@@ -11,7 +11,7 @@ jeito que quiser.
 > foi obtido por engenharia reversa — não existe documentação pública dele em
 > lugar nenhum. Use por sua conta e risco.
 
-[English](README.md) · [Protocolo](docs/protocolo.md) · [Compatibilidade](docs/compatibilidade.md) · [O que ele toca](docs/o-que-o-app-toca.md)
+[English](README.md) · [Protocolo](docs/protocol.md) · [Compatibilidade](docs/compatibility.md) · [O que ele toca](docs/what-it-touches.md)
 
 ![Janela principal do AIOScreen](https://dev.rodopoulos.xyz/imagens/aioscreen/aioscreen-home.png)
 
@@ -119,13 +119,13 @@ Marque "Iniciar com o Windows" a menos que tenha motivo para não marcar.
 ```bash
 git clone https://github.com/rodopoulos1/AIOScreen
 cd AIOScreen
-dotnet publish -c Release -o publicado
+dotnet publish -c Release -o published
 ```
 
 Para gerar o instalador também (precisa do [Inno Setup 6](https://jrsoftware.org/isinfo.php)):
 
 ```bash
-pwsh -File ferramentas/gerar-instalador.ps1
+pwsh -File tools/gerar-instalador.ps1
 ```
 
 ## Sobre o aviso do Windows
@@ -136,8 +136,8 @@ problema.
 
 O que dá para fazer em vez de confiar num desconhecido:
 
-- Ler o código. Tudo que fala com o hardware está em `src/Nucleo/`
-- Ler [o que ele toca](docs/o-que-o-app-toca.md) — resumo: **nenhum acesso à
+- Ler o código. Tudo que fala com o hardware está em `src/Core/`
+- Ler [o que ele toca](docs/what-it-touches.md) — resumo: **nenhum acesso à
   internet em lugar nenhum do projeto**, nada no registro, nada fora de
   `%LOCALAPPDATA%\AIOScreen`
 - Compilar você mesmo com os comandos acima
@@ -145,7 +145,7 @@ O que dá para fazer em vez de confiar num desconhecido:
 
 ## O protocolo
 
-O [`docs/protocolo.md`](docs/protocolo.md) é a parte mais útil deste repositório
+O [`docs/protocol.md`](docs/protocol.md) é a parte mais útil deste repositório
 para quem programa. Até onde procurei, **não existia nada público sobre esse
 painel** antes dele.
 
@@ -167,15 +167,15 @@ vietnamita.
 São 24 com o de origem, e dá para trocar com o app aberto — toda janela se
 retraduz na hora.
 
-Os arquivos de idioma são JSON simples em `idiomas/`, chaveados pelo texto em
+Os arquivos de idioma são JSON simples em `languages/`, chaveados pelo texto em
 português. Corrigir uma tradução ruim é editar uma linha — pull request muito
 bem-vindo, principalmente de quem é nativo.
 
 Dois scripts vigiam isso, e a CI roda os dois:
 
 ```bash
-python ferramentas/textos.py auditar   # texto de tela que escapa do tradutor
-python ferramentas/conferir.py         # marcadores, curingas e siglas
+python tools/textos.py auditar   # texto de tela que escapa do tradutor
+python tools/conferir.py         # marcadores, curingas e siglas
 ```
 
 Idiomas da direita para a esquerda estão de fora de propósito: o layout ainda não

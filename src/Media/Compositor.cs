@@ -1,4 +1,4 @@
-using RodoCooler.Sensores;
+using AIOScreen.Sensors;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace RodoCooler.Midia;
+namespace AIOScreen.Media;
 
 /// <summary>
 /// Desenha os widgets por cima do quadro.

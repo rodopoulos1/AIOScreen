@@ -4,16 +4,16 @@
     Faz os dois passos na ordem certa: publica o app em Release e compila o
     script do Inno Setup em cima do que foi publicado.
 
-        pwsh -File ferramentas/gerar-instalador.ps1
+        pwsh -File tools/gerar-instalador.ps1
 
-    O resultado sai em publicado-instalador\.
+    O resultado sai em installer-output\.
 #>
 
 $ErrorActionPreference = 'Stop'
 
 $raiz = Split-Path $PSScriptRoot
-$publicado = Join-Path $raiz 'publicado'
-$saida = Join-Path $raiz 'publicado-instalador'
+$publicado = Join-Path $raiz 'published'
+$saida = Join-Path $raiz 'installer-output'
 
 # O Inno Setup 6 é o que o script usa. A 5 não entende parte da sintaxe, e a 7
 # muda o nome da pasta — por isso a procura é explícita.
@@ -38,7 +38,7 @@ Get-ChildItem $publicado -Include *.pdb, *.xml -Recurse | Remove-Item -Force -Er
 # O Inno Setup 6 é Unicode, mas sem BOM ele lê o .iss como ANSI e os acentos
 # das mensagens saem trocados. Garantir aqui é mais confiável do que confiar em
 # como o editor salvou.
-$iss = Join-Path $raiz 'instalador\AIOScreen.iss'
+$iss = Join-Path $raiz 'installer\AIOScreen.iss'
 $bytes = [System.IO.File]::ReadAllBytes($iss)
 if (-not ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF)) {
     Write-Host "     (gravando o .iss com BOM para os acentos saírem certos)" -ForegroundColor DarkYellow

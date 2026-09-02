@@ -27,23 +27,23 @@ jobs:
       # frase aparece em portugues numa interface traduzida, e so se descobre
       # olhando print.
       - name: Nenhum texto fora do tradutor
-        run: python ferramentas/textos.py auditar
+        run: python tools/textos.py auditar
 
       # Falha por marcador {0} sumido, curinga de filtro alterado ou sigla
       # (CPU, GPU, RAM) que virou minuscula na traducao. Marcador a mais estoura
       # o string.Format em tempo de execucao.
       - name: Idiomas conferem com a origem
-        run: python ferramentas/conferir.py
+        run: python tools/conferir.py
 
       # A origem e gerada do codigo. Se ela mudar aqui, alguem mexeu num texto
       # e esqueceu de rodar o extrator — e as 23 traducoes ficaram defasadas.
       - name: Origem esta em dia com o codigo
         shell: bash
         run: |
-          python ferramentas/textos.py extrair
-          git diff --exit-code idiomas/pt-BR.json || {
+          python tools/textos.py extrair
+          git diff --exit-code languages/pt-BR.json || {
             echo
-            echo 'idiomas/pt-BR.json esta defasado.'
-            echo 'Rode: python ferramentas/textos.py extrair'
+            echo 'languages/pt-BR.json esta defasado.'
+            echo 'Rode: python tools/textos.py extrair'
             exit 1
           }

@@ -1,12 +1,12 @@
 using System.IO;
-using RodoCooler.Midia;
-using RodoCooler.Sensores;
+using AIOScreen.Media;
+using AIOScreen.Sensors;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace RodoCooler;
+namespace AIOScreen;
 
 /// <summary>
 /// Renderiza os layouts em arquivo, sem precisar da tela do cooler ligada.
@@ -16,7 +16,7 @@ namespace RodoCooler;
 /// por acesso remoto não consegue olhar. Isto resolve — o mesmo código que
 /// desenha no painel escreve num PNG que dá para abrir em qualquer lugar.
 ///
-///     RodoCooler.exe --previa [imagem-de-fundo]
+///     AIOScreen.exe --previa [imagem-de-fundo]
 /// </remarks>
 public static class Previa
 {
@@ -59,8 +59,8 @@ public static class Previa
             var jpeg = Conversor.ParaJpeg(q, 85);
             File.WriteAllBytes(Path.Combine(destino, "como-vai-pro-fio.jpg"), jpeg);
 
-            double segundos = (jpeg.Length + Nucleo.Tema.TamanhoDosMetadados)
-                              / (double)Nucleo.Painel.BytesPorSegundo;
+            double segundos = (jpeg.Length + Core.Tema.TamanhoDosMetadados)
+                              / (double)Core.Painel.BytesPorSegundo;
             Console.WriteLine($"  JPEG de {jpeg.Length / 1024.0:0.0} KB — {segundos:0.00}s de envio a 1 Mbaud");
         }
 

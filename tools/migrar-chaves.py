@@ -1,7 +1,7 @@
 # Carrega para as chaves NOVAS a traducao que ja existia na chave velha, quando
 # a unica diferenca entre as duas e a caixa das letras.
 #
-#     python ferramentas/migrar-chaves.py <pasta-com-os-json-antigos>
+#     python tools/migrar-chaves.py <pasta-com-os-json-antigos>
 #
 # Por que existe: o dicionario e chaveado pelo texto em portugues, entao trocar
 # "tema" por "Tema" na interface inutiliza a traducao daquela frase nos 23
@@ -18,7 +18,7 @@ import re
 import sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PASTA = os.path.join(RAIZ, 'idiomas')
+PASTA = os.path.join(RAIZ, 'languages')
 
 SIGLAS = ('cpu', 'gpu', 'ram', 'pc', 'usb', 'jpeg', 'gif', 'fps', 'led', 'usb-c')
 
@@ -44,7 +44,7 @@ def arrumarCaixa(t):
 
 def main():
     if len(sys.argv) < 2:
-        print('uso: python ferramentas/migrar-chaves.py <pasta-dos-json-antigos>')
+        print('uso: python tools/migrar-chaves.py <pasta-dos-json-antigos>')
         return 2
 
     antiga = sys.argv[1]
