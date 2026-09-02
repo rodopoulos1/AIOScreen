@@ -106,6 +106,49 @@ def aplicar():
     return 0
 
 
+def lote():
+    # Para punhado de chave: um arquivo so, {codigo: {chave: valor}}.
+    #
+    # Existe para nao ligar 4 agentes por causa de uma frase. Quando sao dezenas
+    # de chaves o caminho continua sendo o listar/aplicar, que dividem o trabalho
+    # e conferem cada idioma.
+    caminho = sys.argv[2] if len(sys.argv) > 2 else os.path.join(TEMP, 'lote.json')
+    n = origem()
+    tudo = json.load(open(caminho, encoding='utf-8'))
+
+    total = 0
+    for cod, novos in sorted(tudo.items()):
+        arq = os.path.join(IDIOMAS, cod + '.json')
+        if not os.path.exists(arq):
+            print('%-8s SEM ARQUIVO DE IDIOMA' % cod)
+            continue
+
+        atual = json.load(open(arq, encoding='utf-8'))
+        entraram = 0
+        for k, v in novos.items():
+            if k not in n:
+                print('%-8s chave fora da origem: %r' % (cod, k[:50]))
+                continue
+            atual[k] = v
+            entraram += 1
+
+        saida = {k: atual[k] for k in n if k in atual}
+        with open(arq, 'w', encoding='utf-8') as f:
+            json.dump(saida, f, ensure_ascii=False, indent=2)
+
+        falta = len(n) - len(saida)
+        print('%-8s +%-3d  total %3d/%d%s'
+              % (cod, entraram, len(saida), len(n), '   FALTA %d' % falta if falta else ''))
+        total += entraram
+
+    print('\ntotal aplicado: %d' % total)
+    return 0
+
+
 if __name__ == '__main__':
     acao = sys.argv[1] if len(sys.argv) > 1 else 'listar'
-    sys.exit(listar() if acao == 'listar' else aplicar())
+    if acao == 'listar':
+        sys.exit(listar())
+    if acao == 'lote':
+        sys.exit(lote())
+    sys.exit(aplicar())

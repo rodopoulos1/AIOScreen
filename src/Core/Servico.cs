@@ -367,16 +367,24 @@ public sealed class Servico : IAsyncDisposable
     /// O quadro preto sai em menos de 100 ms, então cabe no tempo que o Windows
     /// dá antes de matar o processo.
     /// </remarks>
-    public void Apagar()
+    /// <summary>
+    /// Deixa a tela apagada: um quadro preto e o brilho no zero.
+    /// </summary>
+    /// <remarks>
+    /// A ORDEM importa, e estava invertida. Subir um tema REINICIA o painel, e o
+    /// reinício devolve o brilho ao padrão do firmware. Mandar brilho 0 antes do
+    /// quadro preto era trabalho jogado fora: o reinício desfazia.
+    ///
+    /// Agora vai o quadro preto, espera-se o painel voltar, e só então o brilho —
+    /// que não tem mais nenhum reinício pela frente para desfazê-lo.
+    ///
+    /// RESSALVA: brilho 0 é HIPÓTESE. O comando real de desligar nunca foi
+    /// capturado do software do fabricante, porque ele não tem esse botão. Pode
+    /// ser que a tela fique preta e acesa em vez de apagada.
+    /// </remarks>
+    public async Task ApagarAsync(TimeSpan? esperaDoPainel = null, CancellationToken ct = default)
     {
         if (!_painel.Ligado) return;
-
-        try
-        {
-            _painel.Enviar(Protocolo.MontarTelemetria(
-                new Telemetria { Quando = DateTime.Now, Brilho = 0 }));
-        }
-        catch { }
 
         try
         {
@@ -384,6 +392,22 @@ public sealed class Servico : IAsyncDisposable
                                                 SixLabors.ImageSharp.Color.Black);
             var blob = Tema.Montar(new[] { Conversor.ParaJpeg(preto, 50) }, 100);
             foreach (var p in Tema.Empacotar(blob)) _painel.Enviar(p);
+
+            // Sem isto a porta fecha com o quadro preto ainda na fila do driver,
+            // e a tela continua na animação anterior.
+            _painel.EsperarEnvio();
+        }
+        catch { return; }
+
+        try
+        {
+            if (!await _painel.ReconectarAsync(_baudEscolhido,
+                                               esperaDoPainel ?? TimeSpan.FromSeconds(12), ct))
+                return;
+
+            _painel.Enviar(Protocolo.MontarTelemetria(
+                new Telemetria { Quando = DateTime.Now, Brilho = 0 }));
+            _painel.EsperarEnvio();
         }
         catch { }
     }

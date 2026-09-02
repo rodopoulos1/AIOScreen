@@ -51,6 +51,9 @@ public partial class JanelaPrincipal : Window
     private Leitura? _ultima;
     private Bandeja? _bandeja;
     private bool _saindoDeVerdade;
+
+    /// <summary>Já estamos no encerramento assíncrono. Ver <see cref="AoFecharJanela"/>.</summary>
+    private bool _encerrando;
     private bool _montando = true;
 
     private List<BitmapSource> _previaAnimada = new();
@@ -87,7 +90,20 @@ public partial class JanelaPrincipal : Window
         Application.Current.SessionEnding += (_, _) =>
         {
             _saindoDeVerdade = true;
-            if (!_cfg.ManterTelaNoDesligamento) _servico.Apagar();
+            if (_cfg.ManterTelaNoDesligamento) return;
+
+            // Aqui o Windows está com pressa: passou do tempo dele, o processo
+            // morre no meio. Por isso a espera do painel é mais curta que a de
+            // sair pela bandeja, e há um teto no total.
+            //
+            // Task.Run tira do fio da interface de propósito: bloquear a
+            // interface esperando um await que precisa dela é travar de vez.
+            try
+            {
+                Task.Run(() => _servico.ApagarAsync(TimeSpan.FromSeconds(5)))
+                    .Wait(TimeSpan.FromSeconds(8));
+            }
+            catch { }
         };
     }
 
@@ -1122,6 +1138,17 @@ public partial class JanelaPrincipal : Window
             return;
         }
 
+        // O Closing NÃO espera um async void: no primeiro await ele devolve o
+        // controle ao WPF, que fecha a janela e começa a derrubar o Dispatcher —
+        // e aí a continuação do await não roda mais nunca. O processo fica
+        // pendurado, vivo, com o ícone na bandeja.
+        //
+        // Por isso o encerramento SEGURA a janela (Cancel) enquanto faz o
+        // trabalho assíncrono, e só derruba o app no fim.
+        if (_encerrando) return;
+        e.Cancel = true;
+        _encerrando = true;
+
         _cfg.Brilho = _servico.Brilho;
         _cfg.QualidadeJpeg = _servico.QualidadeJpeg;
         _cfg.Escurecer = _servico.Escurecer;
@@ -1143,7 +1170,18 @@ public partial class JanelaPrincipal : Window
 
         // Sair do programa não apaga a tela, a menos que a pessoa peça. O painel
         // guarda a animação e continua tocando sem o app.
-        if (!_cfg.ManterTelaAoFechar) _servico.Apagar();
+        //
+        // Tem que ser AGUARDADO: apagar sobe um quadro preto e espera o painel
+        // reiniciar, e o DisposeAsync logo abaixo fecha a porta. Disparar sem
+        // esperar cortava o envio no meio e a tela seguia na animação.
+        // A janela segue aberta aqui de propósito: enquanto ela existe o
+        // Dispatcher continua vivo, e é ele que devolve o controle depois de
+        // cada await abaixo.
+        if (!_cfg.ManterTelaAoFechar)
+        {
+            Rodape("Apagando a tela...");
+            try { await _servico.ApagarAsync(); } catch { }
+        }
 
         _bandeja?.Dispose();
         await _servico.DisposeAsync();

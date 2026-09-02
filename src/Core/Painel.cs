@@ -146,6 +146,38 @@ public sealed class Painel : IDisposable
         }
     }
 
+    /// <summary>
+    /// Espera os bytes já entregues saírem de verdade pelo fio.
+    /// </summary>
+    /// <remarks>
+    /// <c>SerialPort.Write</c> devolve assim que passa os bytes para o driver —
+    /// eles ainda não foram para o fio. Fechar a porta nesse instante DESCARTA o
+    /// que estava na fila.
+    ///
+    /// Era isso que fazia o apagamento ao sair não acontecer: o quadro preto era
+    /// escrito e a porta fechava logo em seguida, no meio do envio. A tela ficava
+    /// tocando a animação anterior, e nada dava erro.
+    /// </remarks>
+    public void EsperarEnvio(int limiteMs = 4000)
+    {
+        var fim = DateTime.UtcNow.AddMilliseconds(limiteMs);
+
+        while (DateTime.UtcNow < fim)
+        {
+            lock (_trava)
+            {
+                if (_porta is null || !_porta.IsOpen) return;
+
+                // Numa porta que sumiu do barramento isto lança — e aí não há
+                // mais o que esperar.
+                try { if (_porta.BytesToWrite == 0) return; }
+                catch { return; }
+            }
+
+            Thread.Sleep(10);
+        }
+    }
+
     public void Desconectar()
     {
         lock (_trava)
