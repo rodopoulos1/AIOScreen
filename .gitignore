@@ -1,0 +1,21 @@
+# Build
+bin/
+obj/
+publicado/
+*.user
+*.suo
+
+# Saída das ferramentas do próprio projeto
+previa/
+autoteste.txt
+temp/
+publicado-instalador/
+
+# Editores
+.vs/
+.idea/
+*.swp
+
+# Windows
+Thumbs.db
+desktop.ini

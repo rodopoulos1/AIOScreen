@@ -1,0 +1,237 @@
+<Window x:Class="RodoCooler.UI.JanelaPrincipal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="AIOScreen" Height="660" Width="940"
+        MinHeight="620" MinWidth="860"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource Fundo}"
+        Foreground="{StaticResource Texto}"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display">
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40" ResizeBorderThickness="6"
+                            GlassFrameThickness="0" CornerRadius="0" />
+    </shell:WindowChrome.WindowChrome>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- ============================================== barra de título -->
+        <Grid Grid.Row="0" Background="{StaticResource Painel}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                <Rectangle Width="3" Height="16" Fill="{StaticResource Brasa}" Margin="0,0,10,0" />
+                <TextBlock Text="AIOSCREEN" FontFamily="{StaticResource FonteDisplay}"
+                           FontSize="13" VerticalAlignment="Center" />
+                <TextBlock Text="SuperFrame Isengard Magic 360" Style="{StaticResource Corpo}"
+                           FontSize="11" Margin="12,0,0,0" VerticalAlignment="Center"
+                           Foreground="{StaticResource Apagado}" />
+            </StackPanel>
+
+            <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    CornerRadius="10" Padding="10,4" Background="{StaticResource Elevado}">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse x:Name="LuzEstado" Width="7" Height="7" Fill="{StaticResource Apagado}"
+                             VerticalAlignment="Center" Margin="0,0,7,0" />
+                    <TextBlock x:Name="TextoEstado" Text="Procurando a tela..."
+                               Style="{StaticResource Corpo}" FontSize="11" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal"
+                        shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                <Button Style="{StaticResource BotaoJanela}" Content="&#xE713;"
+                        Click="AoAbrirConfiguracoes" ToolTip="Configurações" FontSize="13" />
+                <Button Style="{StaticResource BotaoJanela}" Content="&#xE921;"
+                        Click="AoMinimizar" ToolTip="Minimizar" />
+                <Button x:Name="BotaoMaximizar" Style="{StaticResource BotaoJanela}" Content="&#xE922;"
+                        Click="AoMaximizar" ToolTip="Maximizar" />
+                <Button Style="{StaticResource BotaoFechar}" Content="&#xE8BB;"
+                        Click="AoFechar" ToolTip="Fechar" />
+            </StackPanel>
+        </Grid>
+
+        <!-- ==================================================== conteúdo -->
+        <Grid Grid.Row="1" Margin="24,20,24,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- ============================================ o herói: a tela -->
+            <StackPanel Grid.Column="0" Width="368">
+                <TextBlock Text="Como vai ficar na tela" Style="{StaticResource Etiqueta}" />
+
+                <Border Width="356" Height="356" CornerRadius="178"
+                        Background="#0B0808" BorderBrush="{StaticResource Linha}"
+                        BorderThickness="8" HorizontalAlignment="Left">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#FF2A2A" BlurRadius="36" ShadowDepth="0" Opacity="0.20" />
+                    </Border.Effect>
+                    <Grid x:Name="AreaDaPrevia" ClipToBounds="True" Background="Transparent"
+                          MouseLeftButtonUp="AoClicarNaPrevia">
+                        <Image x:Name="Previa" Stretch="UniformToFill"
+                               RenderOptions.BitmapScalingMode="HighQuality">
+                            <Image.Clip>
+                                <EllipseGeometry Center="170,170" RadiusX="170" RadiusY="170" />
+                            </Image.Clip>
+                        </Image>
+                        <TextBlock x:Name="PreviaVazia" Text="clique para escolher uma imagem, GIF ou vídeo"
+                                   Style="{StaticResource Corpo}" FontSize="12" TextAlignment="Center"
+                                   Foreground="{StaticResource Apagado}" MaxWidth="200"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Cartao}" Margin="0,18,12,0" Padding="14,12">
+                    <UniformGrid Columns="4">
+                        <StackPanel>
+                            <TextBlock Text="CPU" Style="{StaticResource Etiqueta}" Margin="0,0,0,3" />
+                            <TextBlock x:Name="ValorCpu" Text="--" Style="{StaticResource Numero}" FontSize="18" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="GPU" Style="{StaticResource Etiqueta}" Margin="0,0,0,3" />
+                            <TextBlock x:Name="ValorGpu" Text="--" Style="{StaticResource Numero}" FontSize="18" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="RAM" Style="{StaticResource Etiqueta}" Margin="0,0,0,3" />
+                            <TextBlock x:Name="ValorRam" Text="--" Style="{StaticResource Numero}" FontSize="18" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Temp" Style="{StaticResource Etiqueta}" Margin="0,0,0,3" />
+                            <TextBlock x:Name="ValorTemp" Text="--" Style="{StaticResource Numero}" FontSize="18" />
+                        </StackPanel>
+                    </UniformGrid>
+                </Border>
+            </StackPanel>
+
+            <!--
+                A home é sobre TEMA: escolher um e mandar para a tela. Tudo que
+                é ajuste fino — enquadramento, widgets, cor, escurecer — mora no
+                editor, e o que é preferência da máquina mora nas configurações.
+                Empilhar slider aqui transformava a tela inicial num painel de
+                controle e escondia a única coisa que se faz todo dia.
+            -->
+            <StackPanel Grid.Column="1" Margin="20,0,0,0">
+
+                <TextBlock Text="Tema" Style="{StaticResource Etiqueta}" />
+                <Border Style="{StaticResource Cartao}">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="0">
+                                <ComboBox x:Name="EscolhaDeTema" Style="{StaticResource Combo}"
+                                          Height="38" SelectionChanged="AoTrocarTema" />
+                                <!-- O dropdown lista só temas de verdade. Sem tema aberto ele
+                                     fica vazio, e este texto explica em vez de deixar em branco. -->
+                                <TextBlock x:Name="SemTema" Text="nenhum tema aberto"
+                                           Style="{StaticResource Corpo}" FontSize="12"
+                                           Foreground="{StaticResource Apagado}"
+                                           Margin="12,0,0,0" VerticalAlignment="Center"
+                                           IsHitTestVisible="False" />
+                            </Grid>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="8,0,0,0">
+                                <Button x:Name="BotaoNovo" Style="{StaticResource BotaoJanela}"
+                                        Width="38" Height="38" Content="&#xE710;" FontSize="14"
+                                        Click="AoNovoTema" ToolTip="Novo tema" />
+                                <!-- Lápis (E70F) e não o "Rename" do catálogo (E8AC): aquele
+                                     desenha uma seta e ninguém entende que renomeia. -->
+                                <Button x:Name="BotaoRenomear" Style="{StaticResource BotaoJanela}"
+                                        Width="38" Height="38" Content="&#xE70F;" FontSize="13"
+                                        Click="AoRenomearTema" ToolTip="Renomear este tema"
+                                        IsEnabled="False" />
+                                <Button x:Name="BotaoExcluir" Style="{StaticResource BotaoJanela}"
+                                        Width="38" Height="38" Content="&#xE74D;" FontSize="13"
+                                        Click="AoExcluirTema" ToolTip="Excluir este tema"
+                                        IsEnabled="False" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="NomeDoArquivo" Grid.Column="0"
+                                       Text="Nenhuma imagem escolhida" Style="{StaticResource Corpo}"
+                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <Button Grid.Column="2" x:Name="BotaoEscolher" Style="{StaticResource BotaoBase}"
+                                    Content="Escolher arquivo..." Click="AoEscolherArquivo" />
+                        </Grid>
+
+                        <TextBlock x:Name="InfoDoTema" Style="{StaticResource Corpo}" FontSize="11"
+                                   Margin="0,10,0,0" Foreground="{StaticResource Apagado}"
+                                   Text="Imagem, GIF animado ou vídeo. O ajuste fino fica no editor." />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Como enviar" Style="{StaticResource Etiqueta}" Margin="0,18,0,7" />
+                <Border Style="{StaticResource Cartao}" Padding="8,8,8,10">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton x:Name="ModoAnimacao" Style="{StaticResource Aba}"
+                                         Content="Animação" IsChecked="True" Checked="AoTrocarModo" />
+                            <RadioButton x:Name="ModoAoVivo" Style="{StaticResource Aba}"
+                                         Content="Ao vivo" Checked="AoTrocarModo" />
+                        </StackPanel>
+                        <TextBlock x:Name="ExplicacaoDoModo" Style="{StaticResource Corpo}" FontSize="11"
+                                   Margin="14,4,10,0" Foreground="{StaticResource Apagado}"
+                                   TextWrapping="Wrap"
+                                   Text="Sobe tudo uma vez e o painel toca sozinho, mesmo com o PC desligado. Os números congelam no valor do momento do envio." />
+                        <TextBlock x:Name="EstimativaDeEnvio" Style="{StaticResource Corpo}" FontSize="11"
+                                   Margin="14,10,10,0" Foreground="{StaticResource Ambar}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Grid>
+
+        <!-- ====================================================== rodapé -->
+        <Border Grid.Row="2" Background="{StaticResource Painel}" BorderBrush="{StaticResource Linha}"
+                BorderThickness="0,1,0,0" Padding="24,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock x:Name="TextoRodape" Style="{StaticResource Corpo}" FontSize="11"
+                               Text="Procurando a tela do cooler..." />
+                    <ProgressBar x:Name="BarraDeEnvio" Height="3" Margin="0,7,20,0"
+                                 Background="{StaticResource Linha}" Foreground="{StaticResource Brasa}"
+                                 BorderThickness="0" Visibility="Collapsed" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="BotaoEditor" Style="{StaticResource BotaoBase}"
+                            Content="Abrir editor" Click="AoAbrirEditor"
+                            IsEnabled="False" Margin="0,0,10,0" />
+                    <Button x:Name="BotaoSalvar" Style="{StaticResource BotaoBase}"
+                            Content="Salvar como..." Click="AoSalvarTema"
+                            IsEnabled="False" Margin="0,0,10,0" />
+                    <Button x:Name="BotaoAplicar" Style="{StaticResource BotaoPrincipal}"
+                            Content="Aplicar na tela" Click="AoAplicar" IsEnabled="False" MinWidth="150" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

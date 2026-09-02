@@ -1,0 +1,204 @@
+<Window x:Class="RodoCooler.UI.JanelaConfiguracoes"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Configurações" Height="620" Width="560"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource Fundo}" Foreground="{StaticResource Texto}"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Display">
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="40" ResizeBorderThickness="0"
+                            GlassFrameThickness="0" CornerRadius="0" />
+    </shell:WindowChrome.WindowChrome>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Background="{StaticResource Painel}">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                <Rectangle Width="3" Height="15" Fill="{StaticResource Brasa}" Margin="0,0,10,0" />
+                <TextBlock Text="CONFIGURAÇÕES" FontFamily="{StaticResource FonteDisplay}"
+                           FontSize="12" VerticalAlignment="Center" />
+            </StackPanel>
+            <Button Style="{StaticResource BotaoFechar}" Content="&#xE8BB;"
+                    HorizontalAlignment="Right" Click="AoFechar"
+                    shell:WindowChrome.IsHitTestVisibleInChrome="True" />
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" Margin="20,16,14,8" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,6,0">
+
+                <TextBlock Text="Idioma" Style="{StaticResource Etiqueta}" />
+                <Border Style="{StaticResource Cartao}">
+                    <StackPanel>
+                        <ComboBox x:Name="EscolhaDeIdioma" Style="{StaticResource Combo}"
+                                  SelectionChanged="AoMudarIdioma" />
+                        <TextBlock Style="{StaticResource Corpo}" FontSize="11" Margin="0,7,0,0"
+                                   Foreground="{StaticResource Apagado}"
+                                   Text="Muda na hora. O automático segue o idioma do Windows e cai no português quando não há tradução." />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Ao ligar o PC" Style="{StaticResource Etiqueta}" Margin="0,18,0,7" />
+                <Border Style="{StaticResource Cartao}">
+                    <StackPanel>
+                        <CheckBox x:Name="SubirComWindows" Content="Iniciar o AIOScreen com o Windows"
+                                  Click="AoMudarAutostart" />
+                        <TextBlock Style="{StaticResource Corpo}" FontSize="11" Margin="26,6,0,0"
+                                   Foreground="{StaticResource Apagado}"
+                                   Text="Pede confirmação do Windows UMA vez, aqui. Depois disso o app sobe sozinho no logon já com privilégio, sem nunca mais perguntar nada — e é isso que faz a temperatura de CPU funcionar, que precisa de um driver que só carrega elevado." />
+                        <TextBlock x:Name="EstadoDaTemperatura" Style="{StaticResource Corpo}" FontSize="11"
+                                   Margin="26,6,0,0" Foreground="{StaticResource Ambar}" />
+
+                        <CheckBox x:Name="AplicarAoAbrir" Content="Reaplicar o último conteúdo ao abrir"
+                                  Margin="0,14,0,0" Click="AoMudarChave" />
+                        <TextBlock Style="{StaticResource Corpo}" FontSize="11" Margin="26,6,0,0"
+                                   Foreground="{StaticResource Apagado}"
+                                   Text="Manda para a tela o que estava configurado da última vez, sem precisar clicar em Aplicar." />
+
+                        <CheckBox x:Name="MinimizarAoFechar" Content="Fechar minimiza em vez de encerrar"
+                                  Margin="0,14,0,0" Click="AoMudarChave" />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Hardware" Style="{StaticResource Etiqueta}" Margin="0,18,0,7" />
+                <Border Style="{StaticResource Cartao}">
+                    <StackPanel>
+                        <TextBlock Text="Placa de vídeo a exibir" Style="{StaticResource Corpo}"
+                                   Foreground="{StaticResource Texto}" Margin="0,0,0,6" />
+                        <ComboBox x:Name="EscolhaDeGpu" Style="{StaticResource Combo}"
+                                  SelectionChanged="AoMudarGpu" />
+                        <TextBlock x:Name="DicaDeGpu" Style="{StaticResource Corpo}" FontSize="11"
+                                   Margin="0,7,0,0" Foreground="{StaticResource Apagado}"
+                                   Text="Com placa dedicada e vídeo integrado juntos, a integrada marca 0% para sempre. Escolha a certa aqui." />
+
+                        <TextBlock Text="Porta da tela" Style="{StaticResource Corpo}"
+                                   Foreground="{StaticResource Texto}" Margin="0,16,0,6" />
+                        <ComboBox x:Name="EscolhaDePorta" Style="{StaticResource Combo}"
+                                  SelectionChanged="AoMudarPorta" />
+                        <TextBlock x:Name="DicaDePorta" Style="{StaticResource Corpo}" FontSize="11"
+                                   Margin="0,7,0,0" Foreground="{StaticResource Apagado}" />
+
+                        <Grid Margin="0,16,0,0">
+                            <TextBlock Text="Alerta de temperatura" Style="{StaticResource Corpo}"
+                                       Foreground="{StaticResource Texto}" />
+                            <TextBlock x:Name="ValorLimite" Style="{StaticResource Corpo}"
+                                       HorizontalAlignment="Right" />
+                        </Grid>
+                        <Slider x:Name="LimiteQuente" Style="{StaticResource Deslizante}"
+                                Minimum="50" Maximum="100" TickFrequency="1"
+                                ValueChanged="AoMudarLimite" />
+                        <TextBlock Style="{StaticResource Corpo}" FontSize="11"
+                                   Foreground="{StaticResource Apagado}"
+                                   Text="Acima disto o número na tela do cooler fica âmbar, ignorando a cor escolhida." />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Envio para a tela" Style="{StaticResource Etiqueta}" Margin="0,18,0,7" />
+                <Border Style="{StaticResource Cartao}">
+                    <StackPanel>
+                        <Grid>
+                            <TextBlock Text="Qualidade do JPEG" Style="{StaticResource Corpo}"
+                                       Foreground="{StaticResource Texto}" />
+                            <TextBlock x:Name="ValorQualidade" Style="{StaticResource Corpo}"
+                                       HorizontalAlignment="Right" />
+                        </Grid>
+                        <Slider x:Name="Qualidade" Style="{StaticResource Deslizante}"
+                                Minimum="40" Maximum="95" TickFrequency="5"
+                                ValueChanged="AoMudarQualidade" />
+                        <TextBlock Style="{StaticResource Corpo}" FontSize="11"
+                                   Foreground="{StaticResource Apagado}"
+                                   Text="Qualidade alta pesa mais e demora mais para subir. A tela tem 2 polegadas — 85 já é generoso." />
+
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="14" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Quadros no modo ao vivo" Style="{StaticResource Etiqueta}" />
+                                <ComboBox x:Name="EscolhaDeQuadros" Style="{StaticResource Combo}"
+                                          SelectionChanged="AoMudarQuadros">
+                                    <ComboBoxItem Content="1 — parado, sobe rápido" />
+                                    <ComboBoxItem Content="4 quadros" />
+                                    <ComboBoxItem Content="8 quadros" />
+                                    <ComboBoxItem Content="16 quadros" />
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Atualizar a cada" Style="{StaticResource Etiqueta}" />
+                                <ComboBox x:Name="EscolhaDeIntervalo" Style="{StaticResource Combo}"
+                                          SelectionChanged="AoMudarIntervalo">
+                                    <ComboBoxItem Content="2 segundos" />
+                                    <ComboBoxItem Content="3 segundos" />
+                                    <ComboBoxItem Content="5 segundos" />
+                                    <ComboBoxItem Content="10 segundos" />
+                                    <ComboBoxItem Content="30 segundos" />
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Style="{StaticResource Corpo}" FontSize="11" Margin="0,8,0,0"
+                                   Foreground="{StaticResource Apagado}"
+                                   Text="A tela recebe 100 KB por segundo. Mais quadros dão animação com números ao vivo, mas cada atualização demora mais." />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Vídeo" Style="{StaticResource Etiqueta}" Margin="0,18,0,7" />
+                <Border Style="{StaticResource Cartao}">
+                    <StackPanel>
+                        <TextBlock Text="Caminho do ffmpeg" Style="{StaticResource Corpo}"
+                                   Foreground="{StaticResource Texto}" Margin="0,0,0,6" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="CaminhoFfmpeg" Grid.Column="0" Height="34" Padding="10,8"
+                                     Background="{StaticResource Elevado}" Foreground="{StaticResource Texto}"
+                                     BorderBrush="{StaticResource Linha}" VerticalContentAlignment="Center"
+                                     FontFamily="{StaticResource FonteCorpo}" FontSize="12"
+                                     TextChanged="AoMudarFfmpeg" />
+                            <Button Grid.Column="2" Style="{StaticResource BotaoBase}" Content="Procurar..."
+                                    Padding="14,8" Click="AoProcurarFfmpeg" />
+                        </Grid>
+                        <TextBlock x:Name="EstadoDoFfmpeg" Style="{StaticResource Corpo}" FontSize="11"
+                                   Margin="0,7,0,0" Foreground="{StaticResource Apagado}" />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Sobre" Style="{StaticResource Etiqueta}" Margin="0,18,0,7" />
+                <Border Style="{StaticResource Cartao}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource Corpo}" FontSize="11"
+                                   Text="AIOScreen fala direto com a tela do water cooler por porta serial a 1.000.000 baud. O protocolo foi obtido por engenharia reversa: não existe documentação pública dele." />
+                        <TextBlock x:Name="TextoDaPasta" Style="{StaticResource Corpo}" FontSize="11"
+                                   Margin="0,10,0,0" Foreground="{StaticResource Apagado}" />
+                        <Button Style="{StaticResource BotaoBase}" Content="Abrir a pasta de dados"
+                                HorizontalAlignment="Left" Margin="0,10,0,0" Padding="12,6" FontSize="11"
+                                Click="AoAbrirPasta" />
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Background="{StaticResource Painel}" BorderBrush="{StaticResource Linha}"
+                BorderThickness="0,1,0,0" Padding="20,12">
+            <Grid>
+                <TextBlock x:Name="TextoRodape" Style="{StaticResource Corpo}" FontSize="11"
+                           VerticalAlignment="Center" />
+                <Button Style="{StaticResource BotaoPrincipal}" Content="Fechar" MinWidth="110"
+                        HorizontalAlignment="Right" Click="AoFechar" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

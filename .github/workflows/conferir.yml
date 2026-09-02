@@ -1,0 +1,49 @@
+name: build e idiomas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  conferir:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compilar
+        run: dotnet build AIOScreen.csproj -c Release
+
+      # Falha quando algum texto de tela nao passa por Idioma.T(). Sem isto a
+      # frase aparece em portugues numa interface traduzida, e so se descobre
+      # olhando print.
+      - name: Nenhum texto fora do tradutor
+        run: python ferramentas/textos.py auditar
+
+      # Falha por marcador {0} sumido, curinga de filtro alterado ou sigla
+      # (CPU, GPU, RAM) que virou minuscula na traducao. Marcador a mais estoura
+      # o string.Format em tempo de execucao.
+      - name: Idiomas conferem com a origem
+        run: python ferramentas/conferir.py
+
+      # A origem e gerada do codigo. Se ela mudar aqui, alguem mexeu num texto
+      # e esqueceu de rodar o extrator — e as 23 traducoes ficaram defasadas.
+      - name: Origem esta em dia com o codigo
+        shell: bash
+        run: |
+          python ferramentas/textos.py extrair
+          git diff --exit-code idiomas/pt-BR.json || {
+            echo
+            echo 'idiomas/pt-BR.json esta defasado.'
+            echo 'Rode: python ferramentas/textos.py extrair'
+            exit 1
+          }

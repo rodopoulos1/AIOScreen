@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <!-- Só pelo NotifyIcon: o WPF não tem ícone de bandeja e o do WinForms é o
+         que todo mundo usa. Nada mais do WinForms entra na interface. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- O namespace interno segue RodoCooler: renomear namespace mexe em todo
+         arquivo sem mudar nada para quem usa. O que o usuário vê é o
+         AssemblyName. -->
+    <AssemblyName>AIOScreen</AssemblyName>
+    <RootNamespace>RodoCooler</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>Rodopoulos</Authors>
+    <Product>AIOScreen</Product>
+    <Description>Controla a tela LCD redonda de water cooler sem o software do fabricante.</Description>
+    <Copyright>Copyright (c) 2026 Rodopoulos</Copyright>
+    <ApplicationIcon>src\UI\icone.ico</ApplicationIcon>
+    <!-- O app abre uma porta serial e le sensor de hardware: sem elevacao o
+         LibreHardwareMonitor nao consegue carregar o driver de temperatura. -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 3.1.12 e nao 3.1.5: as versoes anteriores tem CVE de gravidade alta.
+         Fica na linha 3.x porque o ImageSharp.Drawing 2.x depende dela. -->
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.6" />
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+    <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ligar o WinForms injeta System.Drawing e System.Windows.Forms em TODO
+         arquivo, e aí Color, Font, FontFamily, Image, Application e
+         MouseEventArgs passam a existir em duplicata contra o ImageSharp e o
+         WPF. Só o Bandeja.cs precisa do WinForms, e ele importa na mão. -->
+    <Using Remove="System.Drawing" />
+    <Using Remove="System.Windows.Forms" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="src\UI\icone.ico" />
+    <Content Include="src\UI\icone.ico" Condition="Exists('src\UI\icone.ico')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Os arquivos de idioma precisam viajar junto com o executavel: o
+         Idioma.cs os procura em <pasta do exe>\idiomas. Sem isto o app
+         instalado fica so em portugues, por mais traducao que exista no
+         repositorio. -->
+    <Content Include="idiomas\*.json" Condition="Exists('idiomas')">
+      <Link>idiomas\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>
