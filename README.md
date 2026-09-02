@@ -51,7 +51,10 @@ On top of that, its editor is rigid and the software is not maintained.
 - **Starts with Windows** through a scheduled task: elevated, **no UAC prompt
   after install**
 - **Lives in the tray** using 21 MB of RAM and 0% CPU
-- **Turns the screen off** when the PC shuts down
+- **You decide what happens when you quit or shut down** — leave the animation
+  playing on the panel, or blank the screen. Blanking on shutdown is the default,
+  because a panel glowing all night on USB standby power is what started this
+  project
 - **24 languages**, switchable on the fly — no restart
 
 ### Two send modes

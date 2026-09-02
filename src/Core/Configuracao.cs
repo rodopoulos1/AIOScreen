@@ -42,6 +42,29 @@ public sealed class Configuracao
     public bool MinimizarAoFechar { get; set; } = true;
 
     /// <summary>
+    /// Deixa a tela tocando depois de sair do programa. Ligado por padrão.
+    /// </summary>
+    /// <remarks>
+    /// Sair de um app não deveria apagar um monitor. No modo Animação o painel
+    /// guarda os quadros e toca sozinho, sem depender de nada no PC — apagar ao
+    /// sair jogaria fora justamente o que esse modo existe para fazer.
+    /// </remarks>
+    public bool ManterTelaAoFechar { get; set; } = true;
+
+    /// <summary>
+    /// Deixa a tela tocando depois de desligar o PC. DESLIGADO por padrão.
+    /// </summary>
+    /// <remarks>
+    /// A placa-mãe mantém 5 V no USB com a máquina desligada, então o painel
+    /// segue aceso a noite inteira. Era o defeito do software do fabricante que
+    /// motivou este projeto, e por isso o padrão é apagar.
+    ///
+    /// Fica como opção porque a escolha oposta também é legítima: quem gosta da
+    /// animação rodando com o PC desligado só precisa marcar.
+    /// </remarks>
+    public bool ManterTelaNoDesligamento { get; set; }
+
+    /// <summary>
     /// Reaplica o último tema ao abrir. Ligado por padrão.
     /// </summary>
     /// <remarks>

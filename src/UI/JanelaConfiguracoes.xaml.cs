@@ -36,6 +36,8 @@ public partial class JanelaConfiguracoes : Window
             : Localization.Idioma.T("Agora o app está sem privilégio, então a temperatura aparece como \"--\". Uso, frequência e memória funcionam normalmente.");
         AplicarAoAbrir.IsChecked = _cfg.AplicarAoAbrir;
         MinimizarAoFechar.IsChecked = _cfg.MinimizarAoFechar;
+        ManterTelaAoFechar.IsChecked = _cfg.ManterTelaAoFechar;
+        ManterTelaNoDesligamento.IsChecked = _cfg.ManterTelaNoDesligamento;
 
         MontarGpus();
         MontarPortas();
@@ -131,6 +133,8 @@ public partial class JanelaConfiguracoes : Window
         if (_montando) return;
         _cfg.AplicarAoAbrir = AplicarAoAbrir.IsChecked == true;
         _cfg.MinimizarAoFechar = MinimizarAoFechar.IsChecked == true;
+        _cfg.ManterTelaAoFechar = ManterTelaAoFechar.IsChecked == true;
+        _cfg.ManterTelaNoDesligamento = ManterTelaNoDesligamento.IsChecked == true;
         Salvar();
     }
 

@@ -25,6 +25,18 @@ def listar():
     n = origem()
     os.makedirs(TEMP, exist_ok=True)
 
+    # Apaga os novos-*.json da rodada anterior ANTES de listar.
+    #
+    # Sem isto o 'aplicar' pega os arquivos velhos como se fossem os novos: eles
+    # tem o nome certo, abrem como JSON valido e as chaves existem na origem,
+    # entao nada reclama. Ja aconteceu — a rodada seguinte reaplicou a anterior
+    # em silencio e as chaves novas continuaram faltando.
+    velhos = [f for f in os.listdir(TEMP) if f.startswith('novos-') and f.endswith('.json')]
+    for f in velhos:
+        os.remove(os.path.join(TEMP, f))
+    if velhos:
+        print('limpei %d arquivo(s) da rodada anterior' % len(velhos))
+
     porIdioma = {}
     todas = []
 

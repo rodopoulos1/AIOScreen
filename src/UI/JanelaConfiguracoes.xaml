@@ -66,6 +66,23 @@
                     </StackPanel>
                 </Border>
 
+                <TextBlock Text="Ao sair e ao desligar" Style="{StaticResource Etiqueta}" Margin="0,18,0,7" />
+                <Border Style="{StaticResource Cartao}">
+                    <StackPanel>
+                        <CheckBox x:Name="ManterTelaAoFechar" Content="Manter a tela ligada ao sair do programa"
+                                  Click="AoMudarChave" />
+                        <TextBlock Style="{StaticResource Corpo}" FontSize="11" Margin="26,6,0,0"
+                                   Foreground="{StaticResource Apagado}"
+                                   Text="No modo Animação o painel guarda os quadros e toca sozinho, sem depender do app. Desmarque para a tela ficar preta ao sair." />
+
+                        <CheckBox x:Name="ManterTelaNoDesligamento" Content="Manter a tela ligada depois de desligar o PC"
+                                  Margin="0,14,0,0" Click="AoMudarChave" />
+                        <TextBlock Style="{StaticResource Corpo}" FontSize="11" Margin="26,6,0,0"
+                                   Foreground="{StaticResource Apagado}"
+                                   Text="A placa-mãe mantém 5 V no USB com a máquina desligada, então o painel segue aceso a noite inteira. Desmarcado, o AIOScreen apaga a tela junto com o Windows." />
+                    </StackPanel>
+                </Border>
+
                 <TextBlock Text="Hardware" Style="{StaticResource Etiqueta}" Margin="0,18,0,7" />
                 <Border Style="{StaticResource Cartao}">
                     <StackPanel>

@@ -81,7 +81,14 @@ public partial class JanelaPrincipal : Window
         // O Windows avisa cada programa antes de desligar. É a única janela para
         // apagar a tela do cooler: depois disso o processo morre e ela fica
         // acesa a noite inteira com a energia de espera do USB.
-        Application.Current.SessionEnding += (_, _) => { _saindoDeVerdade = true; _servico.Apagar(); };
+        //
+        // Quem quiser a animação rodando com o PC desligado marca a opção e o
+        // apagamento não acontece.
+        Application.Current.SessionEnding += (_, _) =>
+        {
+            _saindoDeVerdade = true;
+            if (!_cfg.ManterTelaNoDesligamento) _servico.Apagar();
+        };
     }
 
     /// <summary>
@@ -1133,7 +1140,11 @@ public partial class JanelaPrincipal : Window
 
         _envio?.Cancel();
         _relogioDaPrevia.Stop();
-        _servico.Apagar();
+
+        // Sair do programa não apaga a tela, a menos que a pessoa peça. O painel
+        // guarda a animação e continua tocando sem o app.
+        if (!_cfg.ManterTelaAoFechar) _servico.Apagar();
+
         _bandeja?.Dispose();
         await _servico.DisposeAsync();
 
