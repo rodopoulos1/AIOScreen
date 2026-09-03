@@ -64,9 +64,28 @@ public partial class App : Application
     /// </remarks>
     private bool SubirElevadoPelaTarefa()
     {
-        if (UI.Autostart.Elevado()) return false;
-        if (!UI.Autostart.Instalado()) return false;
-        if (AcabouDeTentar()) return false;
+        bool elevado = UI.Autostart.Elevado();
+        bool temTarefa = !elevado && UI.Autostart.Instalado();
+
+        Core.Diario.Escrever($"elevacao  elevado={elevado}  tarefa={temTarefa}");
+
+        if (elevado) return false;
+        if (!temTarefa) return false;
+
+        if (AcabouDeTentar())
+        {
+            Core.Diario.Escrever("elevacao: ja tentou ha pouco, seguindo sem privilegio");
+            return false;
+        }
+
+        Core.Diario.Escrever("elevacao: reabrindo pela tarefa agendada");
+
+        // A tarefa sobe com --minimizado, porque o uso normal dela é o logon.
+        // Quem clicou no atalho quer VER a janela: o recado fica em disco, que
+        // é determinístico. Antes eu tentava achar a janela nova e mandar uma
+        // mensagem, e isso era uma corrida — a janela às vezes aparecia antes
+        // de saber ouvir, e o recado se perdia.
+        Marcar("abrir-visivel.marca");
 
         try { _trava?.ReleaseMutex(); } catch { }
         _trava?.Dispose();
@@ -76,25 +95,49 @@ public partial class App : Application
         {
             // Falhou: seguimos sem privilégio mesmo, que é melhor do que não
             // abrir. A trava volta para o lugar.
+            Core.Diario.Escrever("elevacao: schtasks FALHOU, seguindo sem privilegio");
             _trava = new Mutex(initiallyOwned: true, @"Global\AIOScreen_instancia_unica", out _);
             return false;
         }
 
-        // A tarefa sobe com --minimizado, porque o uso normal dela é o logon.
-        // Quem clicou no atalho quer VER a janela, então ela é chamada à frente
-        // assim que aparece.
-        for (int i = 0; i < 60; i++)
-        {
-            var janela = FindWindow(null, "AIOScreen");
-            if (janela != IntPtr.Zero)
-            {
-                PostMessage(janela, WM_MOSTRAR, IntPtr.Zero, IntPtr.Zero);
-                break;
-            }
-            Thread.Sleep(100);
-        }
+        Core.Diario.Escrever("elevacao: tarefa disparada, este processo sai");
 
         return true;
+    }
+
+    /// <summary>Deixa um recado em disco para a instância que vai subir.</summary>
+    private static void Marcar(string nome)
+    {
+        try
+        {
+            Directory.CreateDirectory(Core.Configuracao.Pasta);
+            File.WriteAllText(Path.Combine(Core.Configuracao.Pasta, nome), "");
+        }
+        catch { }
+    }
+
+    /// <summary>
+    /// Lê e APAGA um recado, se ele existir e for recente.
+    /// </summary>
+    /// <remarks>
+    /// Apagar na leitura é o que impede o recado de valer para sempre: ele serve
+    /// a um arranque só. O prazo cobre o caso de o app nunca ter subido depois
+    /// da marca — um arquivo esquecido não pode mudar o comportamento amanhã.
+    /// </remarks>
+    public static bool ConsumirMarca(string nome, int validadeSegundos = 60)
+    {
+        try
+        {
+            var marca = Path.Combine(Core.Configuracao.Pasta, nome);
+            if (!File.Exists(marca)) return false;
+
+            bool vale = DateTime.UtcNow - File.GetLastWriteTimeUtc(marca)
+                        < TimeSpan.FromSeconds(validadeSegundos);
+
+            File.Delete(marca);
+            return vale;
+        }
+        catch { return false; }
     }
 
     /// <summary>
@@ -111,8 +154,7 @@ public partial class App : Application
                 && DateTime.UtcNow - File.GetLastWriteTimeUtc(marca) < TimeSpan.FromSeconds(30))
                 return true;
 
-            Directory.CreateDirectory(Core.Configuracao.Pasta);
-            File.WriteAllText(marca, "");
+            Marcar("subindo.marca");
             return false;
         }
         catch
@@ -155,8 +197,11 @@ public partial class App : Application
 
         // Depois dos modos de linha de comando, que são de vida curta e podem
         // rodar em paralelo com a janela.
+        Core.Diario.Comecou(e.Args);
+
         if (JaEstaAberto())
         {
+            Core.Diario.Escrever("ja havia uma instancia: trazendo ela para a frente e saindo");
             Shutdown();
             return;
         }

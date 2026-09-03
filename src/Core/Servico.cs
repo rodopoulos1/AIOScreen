@@ -119,6 +119,9 @@ public sealed class Servico : IAsyncDisposable
 
     private string? _portaEscolhida;
     private int _baudEscolhido = Painel.BaudPadrao;
+
+    /// <summary>Contador só para o diário: uma linha a cada dez voltas.</summary>
+    private int _voltas;
     private DateTime _proximaTentativa = DateTime.MinValue;
 
     public void Conectar(string? porta = null, int baud = Painel.BaudPadrao)
@@ -206,6 +209,12 @@ public sealed class Servico : IAsyncDisposable
             Compositor.Desenhar(q, leitura, Widgets, Escurecer);
             return q;
         }
+    }
+
+    /// <summary>Só os elementos, sobre fundo transparente.</summary>
+    public Image<Rgba32> RenderizarWidgets(Leitura leitura)
+    {
+        lock (_trava) return Compositor.SoOsWidgets(leitura, Widgets);
     }
 
     /// <summary>
@@ -496,9 +505,20 @@ public sealed class Servico : IAsyncDisposable
 
     public void Iniciar()
     {
-        if (_laco is not null) return;
+        if (_laco is not null)
+        {
+            Diario.Escrever("Iniciar: laco JA existia, nao criei outro");
+            return;
+        }
+
+        Diario.Escrever("Iniciar: criando o laco");
         _parar = new CancellationTokenSource();
-        _laco = Task.Run(() => LacoAsync(_parar.Token));
+        _laco = Task.Run(async () =>
+        {
+            try { await LacoAsync(_parar.Token); }
+            catch (Exception e) { Diario.Escrever($"laco MORREU: {e.GetType().Name}: {e.Message}"); }
+            Diario.Escrever("laco terminou");
+        });
     }
 
     private async Task LacoAsync(CancellationToken ct)
@@ -532,6 +552,11 @@ public sealed class Servico : IAsyncDisposable
 
                     Avisar(Idioma.T("Ligado"), -1, leitura);
 
+                    // Um sinal de vida a cada 5 minutos. Serve para saber, num
+                    // relato futuro de "congelou", se o laço ainda estava de pé.
+                    if (++_voltas % 300 == 0)
+                        Diario.Escrever($"laco vivo  volta={_voltas}  cpu={leitura.CpuUso:0}%");
+
                     if (Modo == Modo.AoVivo && _fundos.Count > 0 && DateTime.UtcNow >= proximo)
                     {
                         await EnviarTemaAsync(MontarBlob(), null, ct);
@@ -544,18 +569,42 @@ public sealed class Servico : IAsyncDisposable
                     }
                 }
             }
-            catch (OperationCanceledException) { break; }
+            // Só sai quando quem pediu para parar fomos NÓS.
+            //
+            // O SerialPort lança OperationCanceledException quando a escrita
+            // falha — e o painel re-enumera o USB depois de cada envio de tema,
+            // então isso acontece no uso normal, uns segundos após abrir.
+            //
+            // Tratar essa exceção como "mandaram parar" matava o laço para
+            // sempre: a prévia congelava, os números paravam, a telemetria
+            // sumia e o backlight acabava apagando sozinho. O app parecia vivo
+            // e não estava. Sem o `when`, um problema de cabo virava um serviço
+            // morto em silêncio.
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                Diario.Escrever("laco: parada pedida, saindo");
+                break;
+            }
             catch (Exception e)
             {
                 // Cabo arrancado no meio do envio é o caso comum. Derrubar a
                 // conexão aqui faz o app tentar de novo em vez de seguir
                 // escrevendo numa porta morta.
+                Diario.Escrever($"laco  EXCECAO  {e.GetType().Name}: {e.Message}");
                 Avisar(Idioma.T("Erro: {0}", e.Message));
                 _painel.Desconectar();
                 _proximaTentativa = DateTime.UtcNow.AddSeconds(3);
             }
 
-            try { await Task.Delay(1000, ct); } catch { break; }
+            try
+            {
+                await Task.Delay(1000, ct);
+            }
+            catch (Exception e)
+            {
+                Diario.Escrever($"laco: saiu na espera  {e.GetType().Name}  (pedido={ct.IsCancellationRequested})");
+                break;
+            }
         }
     }
 
@@ -595,6 +644,7 @@ public sealed class Servico : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        Diario.Escrever("encerrando o servico");
         _parar?.Cancel();
         if (_laco is not null) { try { await _laco; } catch { } }
         _parar?.Dispose();

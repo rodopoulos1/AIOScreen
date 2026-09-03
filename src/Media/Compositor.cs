@@ -70,25 +70,55 @@ public static class Compositor
     public static void Desenhar(Image<Rgba32> quadro, Leitura leitura,
                                 IReadOnlyList<Widget> widgets, float escurecer = 0.5f)
     {
+        // Escurecer vem ANTES da saída por falta de widgets. Antes era o
+        // contrário, e um tema sem elemento nenhum ia claro para o painel e
+        // escuro na prévia — porque a prévia escurece por outro caminho.
+        Escurecer(quadro, escurecer);
+
         if (widgets.Count == 0) return;
+        quadro.Mutate(ctx => Pintar(ctx, leitura, widgets));
+    }
 
-        if (escurecer > 0.001f)
-            quadro.Mutate(ctx => ctx.Fill(new SolidBrush(Color.Black.WithAlpha(escurecer)),
-                                          new RectangleF(0, 0, Lado, Lado)));
+    /// <summary>Só o véu escuro, sem elemento nenhum.</summary>
+    public static void Escurecer(Image<Rgba32> quadro, float quanto)
+    {
+        if (quanto <= 0.001f) return;
 
-        quadro.Mutate(ctx =>
+        quadro.Mutate(ctx => ctx.Fill(new SolidBrush(Color.Black.WithAlpha(quanto)),
+                                      new RectangleF(0, 0, Lado, Lado)));
+    }
+
+    /// <summary>
+    /// Os elementos sozinhos, sobre fundo transparente.
+    /// </summary>
+    /// <remarks>
+    /// É o que permite a prévia mostrar valor VIVO. Antes ela pré-renderizava
+    /// cada quadro com os números assados dentro, e eles congelavam na leitura
+    /// do momento em que o tema foi aberto — a animação corria, os valores não.
+    ///
+    /// Separando em duas camadas, o fundo continua sendo renderizado uma vez só
+    /// e só esta camada é refeita, uma vez por segundo.
+    /// </remarks>
+    public static Image<Rgba32> SoOsWidgets(Leitura leitura, IReadOnlyList<Widget> widgets)
+    {
+        var camada = new Image<Rgba32>(Lado, Lado, Color.Transparent);
+        if (widgets.Count > 0) camada.Mutate(ctx => Pintar(ctx, leitura, widgets));
+        return camada;
+    }
+
+    private static void Pintar(IImageProcessingContext ctx, Leitura leitura,
+                               IReadOnlyList<Widget> widgets)
+    {
+        foreach (var w in widgets)
         {
-            foreach (var w in widgets)
+            switch (w.Forma)
             {
-                switch (w.Forma)
-                {
-                    case Forma.Numero: Numero(ctx, w, leitura); break;
-                    case Forma.Arco: Arco(ctx, w, leitura); break;
-                    case Forma.Anel: Anel(ctx, w, leitura); break;
-                    case Forma.Barra: Barra(ctx, w, leitura); break;
-                }
+                case Forma.Numero: Numero(ctx, w, leitura); break;
+                case Forma.Arco: Arco(ctx, w, leitura); break;
+                case Forma.Anel: Anel(ctx, w, leitura); break;
+                case Forma.Barra: Barra(ctx, w, leitura); break;
             }
-        });
+        }
     }
 
     private static void Numero(IImageProcessingContext ctx, Widget w, Leitura l)
@@ -217,6 +247,16 @@ public static class Compositor
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Top,
         };
+
+        // Centraliza pelo NÚMERO: a unidade fica pendurada à direita, como em
+        // mostrador de relógio. Sem isto o "°" empurra os dígitos para a
+        // esquerda e eles saem de baixo do rótulo.
+        var (_, unidade) = Widget.Partir(s);
+        if (unidade.Length > 0)
+        {
+            float largura = TextMeasurer.MeasureAdvance(unidade, opcoes).Width;
+            opcoes.Origin = new PointF(x + largura / 2f, topo);
+        }
 
         var tinta = new SolidBrush(cor);
 

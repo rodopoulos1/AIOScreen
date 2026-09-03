@@ -81,7 +81,16 @@
                     </Border.Effect>
                     <Grid x:Name="AreaDaPrevia" ClipToBounds="True" Background="Transparent"
                           MouseLeftButtonUp="AoClicarNaPrevia">
+                        <!-- Duas camadas: o fundo anima, os elementos são
+                             repintados a cada segundo com a leitura de agora.
+                             Numa camada só os valores congelavam. -->
                         <Image x:Name="Previa" Stretch="UniformToFill"
+                               RenderOptions.BitmapScalingMode="HighQuality">
+                            <Image.Clip>
+                                <EllipseGeometry Center="170,170" RadiusX="170" RadiusY="170" />
+                            </Image.Clip>
+                        </Image>
+                        <Image x:Name="PreviaWidgets" Stretch="UniformToFill" IsHitTestVisible="False"
                                RenderOptions.BitmapScalingMode="HighQuality">
                             <Image.Clip>
                                 <EllipseGeometry Center="170,170" RadiusX="170" RadiusY="170" />
@@ -94,23 +103,37 @@
                     </Grid>
                 </Border>
 
+                <!-- Três donos, três colunas. Antes havia um "Temp" solto ao lado
+                     de CPU, GPU e RAM, e não dava para saber de quem era a
+                     temperatura. Agora cada número mora embaixo do seu dono. -->
                 <Border Style="{StaticResource Cartao}" Margin="0,18,12,0" Padding="14,12">
-                    <UniformGrid Columns="4">
-                        <StackPanel>
-                            <TextBlock Text="CPU" Style="{StaticResource Etiqueta}" Margin="0,0,0,3" />
-                            <TextBlock x:Name="ValorCpu" Text="--" Style="{StaticResource Numero}" FontSize="18" />
+                    <UniformGrid Columns="3">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="CPU" Style="{StaticResource Etiqueta}" Margin="0,0,0,3"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock x:Name="ValorCpu" Text="--" Style="{StaticResource Numero}"
+                                       FontSize="18" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="DetalheCpu" Text="--" Style="{StaticResource Corpo}"
+                                       FontSize="11" Foreground="{StaticResource Apagado}"
+                                       HorizontalAlignment="Center" Margin="0,2,0,0" />
                         </StackPanel>
-                        <StackPanel>
-                            <TextBlock Text="GPU" Style="{StaticResource Etiqueta}" Margin="0,0,0,3" />
-                            <TextBlock x:Name="ValorGpu" Text="--" Style="{StaticResource Numero}" FontSize="18" />
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="GPU" Style="{StaticResource Etiqueta}" Margin="0,0,0,3"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock x:Name="ValorGpu" Text="--" Style="{StaticResource Numero}"
+                                       FontSize="18" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="DetalheGpu" Text="--" Style="{StaticResource Corpo}"
+                                       FontSize="11" Foreground="{StaticResource Apagado}"
+                                       HorizontalAlignment="Center" Margin="0,2,0,0" />
                         </StackPanel>
-                        <StackPanel>
-                            <TextBlock Text="RAM" Style="{StaticResource Etiqueta}" Margin="0,0,0,3" />
-                            <TextBlock x:Name="ValorRam" Text="--" Style="{StaticResource Numero}" FontSize="18" />
-                        </StackPanel>
-                        <StackPanel>
-                            <TextBlock Text="Temp" Style="{StaticResource Etiqueta}" Margin="0,0,0,3" />
-                            <TextBlock x:Name="ValorTemp" Text="--" Style="{StaticResource Numero}" FontSize="18" />
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="RAM" Style="{StaticResource Etiqueta}" Margin="0,0,0,3"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock x:Name="ValorRam" Text="--" Style="{StaticResource Numero}"
+                                       FontSize="18" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="DetalheRam" Text="--" Style="{StaticResource Corpo}"
+                                       FontSize="11" Foreground="{StaticResource Apagado}"
+                                       HorizontalAlignment="Center" Margin="0,2,0,0" />
                         </StackPanel>
                     </UniformGrid>
                 </Border>

@@ -33,10 +33,13 @@ CHAMADAS = re.compile(
     r'(?:AIOScreen\.Localization\.Idioma\.(?:T|Marcar)|Localization\.Idioma\.(?:T|Marcar)'
     r'|Idioma\.(?:T|Marcar)|(?<![\w.])T|(?<![\w.])Rodape)\s*\(')
 
-# Texto declarado como "fica em portugues mesmo". Conta como coberto na
-# auditoria, mas NAO entra no dicionario — senao viraria chave faltando nos 23
-# idiomas. Ver Idioma.SemTraducao.
-DISPENSADAS = re.compile(r'(?:Idioma\.)?SemTraducao\s*\(')
+# Texto que NAO vai para a tela. Conta como coberto na auditoria, mas nao entra
+# no dicionario — senao viraria chave faltando nos 23 idiomas.
+#
+#   SemTraducao  texto de interface deixado em portugues de proposito
+#   Diario       diario de bordo em arquivo, so para diagnostico
+DISPENSADAS = re.compile(
+    r'(?:(?:Core\.)?Diario\.(?:Escrever|Comecou)|(?:Idioma\.)?SemTraducao)\s*\(')
 
 LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
 

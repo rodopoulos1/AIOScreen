@@ -400,7 +400,7 @@ public partial class JanelaEditor : Window
             // O ImageSharp centraliza no X e alinha pelo topo em Y. Aqui é
             // preciso medir para reproduzir isso — o Canvas posiciona pelo canto.
             t.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            Canvas.SetLeft(t, x - t.DesiredSize.Width / 2);
+            Canvas.SetLeft(t, x - t.DesiredSize.Width / 2 + MeiaUnidade(s, corpo));
             Canvas.SetTop(t, topo);
             return t;
         }
@@ -419,9 +419,29 @@ public partial class JanelaEditor : Window
             IsHitTestVisible = false,
         };
 
-        Canvas.SetLeft(desenho, x - escrita.Width / 2);
+        Canvas.SetLeft(desenho, x - escrita.Width / 2 + MeiaUnidade(s, corpo));
         Canvas.SetTop(desenho, topo);
         return desenho;
+    }
+
+    /// <summary>
+    /// Metade da largura da unidade, para centralizar pelo número.
+    /// </summary>
+    /// <remarks>
+    /// Espelha o que o <see cref="Compositor"/> faz. As duas contas precisam
+    /// andar juntas, senão a mesa mostra o texto num lugar e o painel noutro.
+    /// </remarks>
+    private double MeiaUnidade(string s, double corpo)
+    {
+        var (_, unidade) = Widget.Partir(s);
+        if (unidade.Length == 0) return 0;
+
+        var medida = new FormattedText(
+            unidade, System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
+            new Typeface(FonteDoPainel, FontStyles.Normal, FontWeights.Bold, FontStretches.Normal),
+            corpo, Brushes.White, VisualTreeHelper.GetDpi(this).PixelsPerDip);
+
+        return medida.Width / 2;
     }
 
     private Path PintarArco(Widget w, double inicioGraus, double varreduraGraus, Brush cor)

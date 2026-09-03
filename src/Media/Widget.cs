@@ -104,6 +104,25 @@ public sealed class Widget
         _ => "",
     };
 
+    /// <summary>
+    /// Separa o número da unidade: "78°" vira ("78", "°").
+    /// </summary>
+    /// <remarks>
+    /// Serve para centralizar pelo NÚMERO, e não pelo texto inteiro. Centrando
+    /// tudo, a unidade empurra os dígitos para a esquerda e eles deixam de ficar
+    /// sob o rótulo — "CPU" aparecia deslocado em relação ao "78".
+    ///
+    /// Hora não tem unidade: "22:35" volta inteiro no primeiro item.
+    /// </remarks>
+    public static (string numero, string unidade) Partir(string valor)
+    {
+        int i = valor.Length;
+        while (i > 0 && !char.IsDigit(valor[i - 1])) i--;
+
+        // Sem dígito nenhum ("--", texto livre), não há o que separar.
+        return i == 0 ? (valor, "") : (valor[..i], valor[i..]);
+    }
+
     /// <summary>Quanto do arco ou da barra fica cheio, de 0 a 1.</summary>
     public float Fracao(Leitura l) => Fonte switch
     {
@@ -201,12 +220,15 @@ public static class Arranjos
                      ArcoInicio = 160, ArcoVarredura = -140, Cor = "FF2A2A" },
         new Widget { Forma = Forma.Arco, Fonte = Fonte.GpuUso, Tamanho = 198,
                      ArcoInicio = 200, ArcoVarredura = 140, Cor = "FF7A3D" },
-        new Widget { Forma = Forma.Numero, Fonte = Fonte.Hora, X = 240, Y = 72,
+        // O relógio estava em Y=72 e quase encostava no arco, que tem raio 198
+        // e portanto topo em Y=42. Desceu para respirar.
+        new Widget { Forma = Forma.Numero, Fonte = Fonte.Hora, X = 240, Y = 94,
                      Tamanho = 27, Cor = "C9BFBC", ComRotulo = false },
         new Widget { Forma = Forma.Numero, Fonte = Fonte.CpuTemp, X = 240, Y = 218,
                      Tamanho = 124, Cor = "FFFFFF" },
-        new Widget { Forma = Forma.Numero, Fonte = Fonte.GpuTemp, X = 240, Y = 332,
-                     Tamanho = 26, Cor = "C9BFBC" },
+        // A GPU era corpo 26 e sumia ao lado do 124 da CPU.
+        new Widget { Forma = Forma.Numero, Fonte = Fonte.GpuTemp, X = 240, Y = 336,
+                     Tamanho = 34, Cor = "C9BFBC" },
     };
 
     private static List<Widget> Duplo() => new()

@@ -70,9 +70,34 @@ public partial class JanelaPrincipal : Window
     /// </remarks>
     private const int MaximoNaPrevia = 40;
 
+    /// <summary>Nasceu para ficar na bandeja, sem passar pela tela.</summary>
+    private readonly bool _nasceEscondida;
+
+
     public JanelaPrincipal()
     {
         InitializeComponent();
+
+        // --minimizado é como a tarefa agendada chama o app, e o uso normal
+        // dela é o logon. Mas ela também é o caminho da reabertura elevada,
+        // vinda de um clique no atalho — e aí a pessoa quer VER a janela. O
+        // recado em disco distingue os dois casos.
+        bool minimizado = Environment.GetCommandLineArgs().Contains("--minimizado");
+        bool pediramVisivel = App.ConsumirMarca("abrir-visivel.marca");
+        _nasceEscondida = minimizado && !pediramVisivel;
+
+        Diario.Escrever($"janela  --minimizado={minimizado}  "
+                        + $"marca-visivel={pediramVisivel}  escondida={_nasceEscondida}");
+
+        if (_nasceEscondida)
+        {
+            // Minimizada ANTES de aparecer. O StartupUri do WPF mostra a janela
+            // e só o Loaded consegue escondê-la — no meio disso ela pisca preta,
+            // sem conteúdo pintado ainda, e parece que o app abriu e fechou
+            // sozinho. Minimizada, ela nunca chega à tela.
+            WindowState = WindowState.Minimized;
+            ShowInTaskbar = false;
+        }
 
         _relogioDaPrevia.Tick += AvancarPrevia;
         _servico.Mudou += AoMudarEstado;
@@ -164,9 +189,24 @@ public partial class JanelaPrincipal : Window
 
     private void AoCarregar(object? remetente, RoutedEventArgs e)
     {
+        Diario.Escrever($"Loaded  escondida={_nasceEscondida}");
+
         Localization.Traduzir.Janela(this);
         Localization.Traduzir.Mudou += AoTrocarIdioma;
         Closed += (_, _) => Localization.Traduzir.Mudou -= AoTrocarIdioma;
+
+        // Aqui só o que é instantâneo. O resto vai depois de a janela PINTAR.
+        //
+        // Abrir porta serial e decodificar um GIF levam segundos, e faziam isso
+        // na thread da interface antes do primeiro quadro: a janela ficava um
+        // retângulo preto até terminar. Escondida na bandeja ninguém via; visível,
+        // parecia app travado.
+        Dispatcher.BeginInvoke(new Action(TerminarDeAbrir), DispatcherPriority.ContextIdle);
+    }
+
+    private void TerminarDeAbrir()
+    {
+        Diario.Escrever("abrindo: aplicando config");
         _servico.Aplicar(_cfg);
 
         MontarListaDeTemas();
@@ -174,6 +214,8 @@ public partial class JanelaPrincipal : Window
 
         AtualizarBotoesDeTema();
         AtualizarModo();
+
+        Diario.Escrever("abrindo: conectando na tela");
         Conectar();
         _servico.Iniciar();
 
@@ -185,16 +227,18 @@ public partial class JanelaPrincipal : Window
             else SoltarOQuePodeSoltar();
         };
 
-        _ = RetomarDeOndeParou();
-
-        // Subiu junto com o Windows: nasce escondido, como todo programa que
-        // inicia com o sistema. Aparecer por cima do que a pessoa está fazendo
-        // no logon é o comportamento errado.
-        if (Environment.GetCommandLineArgs().Contains("--minimizado"))
+        // Nasceu para a bandeja: some agora, já minimizada, sem passar pela tela.
+        if (_nasceEscondida)
         {
+            Diario.Escrever("abrindo: indo para a bandeja");
             Hide();
             _bandeja.Avisar("AIOScreen", T("Rodando na bandeja. Clique no ícone para abrir."));
         }
+
+        Diario.Escrever("abrindo: retomando o ultimo tema");
+        _ = RetomarDeOndeParou();
+
+        Diario.Escrever("abrindo: pronto");
     }
 
     /// <summary>
@@ -788,17 +832,76 @@ public partial class JanelaPrincipal : Window
 
     private void AtualizarPrevia()
     {
-        var img = _servico.RenderizarPrevia(LeituraParaPrevia(), _previaIndice);
+        var img = _servico.RenderizarFundo(_previaIndice);
         if (img is null)
         {
             _relogioDaPrevia.Stop();
             Previa.Source = null;
+            PreviaWidgets.Source = null;
             PreviaVazia.Visibility = Visibility.Visible;
             return;
         }
 
         using (img) Previa.Source = ParaWpf(img);
         PreviaVazia.Visibility = Visibility.Collapsed;
+
+        PintarWidgetsDaPrevia();
+    }
+
+    /// <summary>
+    /// Repinta a camada de elementos da prévia com a leitura de agora.
+    /// </summary>
+    /// <remarks>
+    /// Uma composição de 480x480 por segundo. Assar os elementos em cada quadro
+    /// da animação, que é o que se fazia antes, sairia dezenas de vezes mais
+    /// caro — e mesmo assim os valores ficavam parados, porque os quadros eram
+    /// renderizados uma vez só.
+    /// </remarks>
+    /// <summary>
+    /// Escreve a leitura no cartão de baixo.
+    /// </summary>
+    /// <remarks>
+    /// Cada número embaixo do seu dono. Antes havia um "Temp" solto na quarta
+    /// coluna e não dava para saber se era da CPU, da GPU ou de outra coisa.
+    ///
+    /// Só a unidade é escrita aqui — nada disso passa pelo tradutor porque não
+    /// há palavra nenhuma, apenas número, símbolo de grau, GHz e GB.
+    /// </remarks>
+    private void MostrarLeitura(Leitura l)
+    {
+        ValorCpu.Text = $"{l.CpuUso:0}%";
+        DetalheCpu.Text = Juntar(
+            l.CpuTemp > 0 ? $"{l.CpuTemp:0}°" : null,
+            l.CpuMhz > 0 ? $"{l.CpuMhz / 1000f:0.0} GHz" : null);
+
+        ValorGpu.Text = $"{l.GpuUso:0}%";
+        DetalheGpu.Text = Juntar(
+            l.GpuTemp > 0 ? $"{l.GpuTemp:0}°" : null,
+            l.GpuMemMb > 0 ? $"{l.GpuMemMb / 1024f:0.0} GB" : null);
+
+        ValorRam.Text = $"{l.RamPercent:0}%";
+        DetalheRam.Text = l.RamTotalMb > 0
+            ? $"{l.RamUsadaMb / 1024f:0.0} / {l.RamTotalMb / 1024f:0} GB"
+            : "--";
+    }
+
+    /// <summary>Junta o que existe com um ponto no meio. Sem nada, um traço.</summary>
+    private static string Juntar(string? a, string? b)
+    {
+        var partes = new[] { a, b }.Where(p => !string.IsNullOrEmpty(p)).ToArray();
+        return partes.Length == 0 ? "--" : string.Join(" · ", partes);
+    }
+
+    private void PintarWidgetsDaPrevia()
+    {
+        if (_quantosQuadros == 0 || _servico.Widgets.Count == 0)
+        {
+            PreviaWidgets.Source = null;
+            return;
+        }
+
+        using var camada = _servico.RenderizarWidgets(LeituraParaPrevia());
+        PreviaWidgets.Source = ParaWpfComAlfa(camada);
     }
 
     /// <summary>
@@ -818,14 +921,18 @@ public partial class JanelaPrincipal : Window
         if (_quantosQuadros <= 1) { AtualizarPrevia(); return; }
 
         int passo = Math.Max(1, (int)Math.Ceiling(_quantosQuadros / (double)MaximoNaPrevia));
-        var leitura = LeituraParaPrevia();
 
+        // Só o FUNDO entra nos quadros. Os elementos vão numa camada por cima,
+        // repintada a cada segundo: assados aqui, eles congelariam na leitura
+        // deste instante e a prévia mostraria número velho a animação inteira.
         for (int i = 0; i < _quantosQuadros; i += passo)
         {
-            var img = _servico.RenderizarPrevia(leitura, i);
+            var img = _servico.RenderizarFundo(i);
             if (img is null) break;
             using (img) _previaAnimada.Add(ParaWpf(img));
         }
+
+        PintarWidgetsDaPrevia();
 
         if (_previaAnimada.Count == 0) { AtualizarPrevia(); return; }
 
@@ -859,6 +966,29 @@ public partial class JanelaPrincipal : Window
 
     /// <summary>Largura em que a prévia é exibida. Guardar maior do que isso é desperdício.</summary>
     private const int LarguraDaPrevia = 340;
+
+    /// <summary>
+    /// Igual ao <see cref="ParaWpf"/>, mas em PNG: esta camada tem alfa.
+    /// </summary>
+    /// <remarks>
+    /// JPEG não guarda transparência — os elementos viriam sobre um retângulo
+    /// preto e tapariam o fundo inteiro.
+    /// </remarks>
+    private static BitmapSource ParaWpfComAlfa(SixLabors.ImageSharp.Image<Rgba32> img)
+    {
+        using var ms = new MemoryStream();
+        img.Save(ms, new SixLabors.ImageSharp.Formats.Png.PngEncoder());
+        ms.Position = 0;
+
+        var bmp = new BitmapImage();
+        bmp.BeginInit();
+        bmp.CacheOption = BitmapCacheOption.OnLoad;
+        bmp.DecodePixelWidth = LarguraDaPrevia;
+        bmp.StreamSource = ms;
+        bmp.EndInit();
+        bmp.Freeze();
+        return bmp;
+    }
 
     private static BitmapSource ParaWpf(SixLabors.ImageSharp.Image<Rgba32> img)
     {
@@ -1038,10 +1168,11 @@ public partial class JanelaPrincipal : Window
             if (estado.Ultima is not null)
             {
                 _ultima = estado.Ultima;
-                ValorCpu.Text = $"{estado.Ultima.CpuUso:0}%";
-                ValorGpu.Text = $"{estado.Ultima.GpuUso:0}%";
-                ValorRam.Text = $"{estado.Ultima.RamPercent:0}%";
-                ValorTemp.Text = estado.Ultima.CpuTemp > 0 ? $"{estado.Ultima.CpuTemp:0}°" : "--";
+                MostrarLeitura(estado.Ultima);
+
+                // Escondido na bandeja não há o que repintar, e a prévia é a
+                // parte cara: uma composição de 480x480 a cada leitura.
+                if (IsVisible) PintarWidgetsDaPrevia();
             }
 
             // Toda mensagem do serviço aparece no rodapé: é ela que conta o que

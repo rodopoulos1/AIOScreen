@@ -106,6 +106,37 @@ def aplicar():
     return 0
 
 
+def podar():
+    # Tira as chaves que a origem nao tem mais e reordena pela origem.
+    #
+    # Some texto da interface sem entrar nenhum no lugar — por exemplo quando um
+    # rotulo e removido — e sem isto o conferir.py acusa "sobrando" nos 23
+    # idiomas para sempre.
+    n = origem()
+    total = 0
+
+    for nome in sorted(os.listdir(IDIOMAS)):
+        if not nome.endswith('.json') or nome == 'pt-BR.json':
+            continue
+
+        arq = os.path.join(IDIOMAS, nome)
+        atual = json.load(open(arq, encoding='utf-8'))
+
+        saida = {k: atual[k] for k in n if k in atual}
+        fora = len(atual) - len(saida)
+        if fora == 0:
+            continue
+
+        with open(arq, 'w', encoding='utf-8') as f:
+            json.dump(saida, f, ensure_ascii=False, indent=2)
+
+        print('%-8s -%d  total %d/%d' % (nome[:-5], fora, len(saida), len(n)))
+        total += fora
+
+    print('\nchaves podadas: %d' % total)
+    return 0
+
+
 def lote():
     # Para punhado de chave: um arquivo so, {codigo: {chave: valor}}.
     #
@@ -151,4 +182,6 @@ if __name__ == '__main__':
         sys.exit(listar())
     if acao == 'lote':
         sys.exit(lote())
+    if acao == 'podar':
+        sys.exit(podar())
     sys.exit(aplicar())
