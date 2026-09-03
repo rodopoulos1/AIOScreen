@@ -61,14 +61,20 @@ public partial class JanelaPrincipal : Window
     private readonly DispatcherTimer _relogioDaPrevia = new();
 
     /// <summary>
-    /// Teto de quadros na prévia.
+    /// Teto de quadros na prévia. Igual ao do conteúdo, de propósito.
     /// </summary>
     /// <remarks>
-    /// Cada quadro renderizado ocupa memória de imagem. Um GIF de 120 quadros
-    /// passaria de 100 MB só para mostrar movimento num círculo de 356 px — a
-    /// amostragem pega quadros espalhados e o movimento fica igual.
+    /// Era 40, para poupar memória, e o movimento ficava PICADO — um conteúdo de
+    /// 102 quadros virava 34, com o intervalo esticado para 300 ms para manter a
+    /// duração. Três quadros por segundo é slideshow, e dava a impressão de que
+    /// os temas importados estavam quebrados.
+    ///
+    /// Igualado ao teto do conteúdo, a prévia mostra o MESMO que vai para o
+    /// painel, no mesmo ritmo. O custo em memória caiu junto: desde que a prévia
+    /// virou duas camadas, estes quadros são só o fundo, decodificados na
+    /// largura de exibição.
     /// </remarks>
-    private const int MaximoNaPrevia = 40;
+    private const int MaximoNaPrevia = Conversor.MaximoDeQuadros;
 
     /// <summary>Nasceu para ficar na bandeja, sem passar pela tela.</summary>
     private readonly bool _nasceEscondida;
@@ -358,6 +364,7 @@ public partial class JanelaPrincipal : Window
         _servico.Zoom = t.Zoom;
         _servico.DeslocamentoX = t.DeslocamentoX;
         _servico.DeslocamentoY = t.DeslocamentoY;
+        _servico.AtrasoEscolhido = t.AtrasoMs;
 
         ModoAoVivo.IsChecked = t.Modo == Modo.AoVivo;
         ModoAnimacao.IsChecked = t.Modo == Modo.Animacao;
@@ -410,6 +417,7 @@ public partial class JanelaPrincipal : Window
         p.Zoom = _servico.Zoom;
         p.DeslocamentoX = _servico.DeslocamentoX;
         p.DeslocamentoY = _servico.DeslocamentoY;
+        p.AtrasoMs = _servico.AtrasoEscolhido;
     }
 
     /// <summary>Grava o tema aberto. Sem tema aberto, pergunta o nome e cria um.</summary>
@@ -1388,3 +1396,6 @@ public partial class JanelaPrincipal : Window
         Application.Current.Shutdown();
     }
 }
+
+
+

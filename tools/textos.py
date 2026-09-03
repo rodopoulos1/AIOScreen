@@ -22,8 +22,9 @@ import sys
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESTINO = os.path.join(RAIZ, 'languages')
 
-# So escrevem no console de diagnostico: nunca chegam na tela.
-FORA = ('src/Autoteste.cs', 'src/Previa.cs')
+# So escrevem no console: nunca chegam na tela, e traduzir saida de linha de
+# comando em 23 idiomas nao serve para nada.
+FORA = ('src/Autoteste.cs', 'src/Previa.cs', 'src/ImportarSmartMonitor.cs')
 
 ATRIBUTOS = ('Text', 'Content', 'ToolTip', 'Title', 'Header')
 

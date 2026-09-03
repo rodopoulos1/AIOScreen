@@ -99,6 +99,19 @@ public partial class JanelaEditor : Window
         // e não existiriam ainda se a tradução rodasse antes.
         Localization.Traduzir.Janela(this);
 
+        // Velocidade só faz sentido com movimento: numa imagem parada o controle
+        // não teria o que mudar.
+        bool anima = _servico.QuadrosCarregados > 1;
+        CaixaDaVelocidade.Visibility = anima ? Visibility.Visible : Visibility.Collapsed;
+
+        if (anima)
+        {
+            int fps = Math.Clamp(1000 / Math.Max(1, _servico.AtrasoAtual),
+                                 5, Conversor.QuadrosPorSegundo);
+            Velocidade.Value = fps;
+            MostrarVelocidade(fps);
+        }
+
         Zoom.Value = _servico.Zoom * 100;
         Escurecer.Value = _servico.Escurecer * 100;
         ValorZoom.Text = $"{(int)(_servico.Zoom * 100)}%";
@@ -1173,6 +1186,35 @@ public partial class JanelaEditor : Window
         _escolhido.Espessura = (float)Espessura.Value;
         ValorEspessura.Text = ((int)Espessura.Value).ToString();
         RedesenharTudo();
+    }
+
+    /// <summary>
+    /// Ritmo da animação, em quadros por segundo.
+    /// </summary>
+    /// <remarks>
+    /// O painel guarda um número fixo de quadros — o teto de 4 MB — então este
+    /// controle troca DURAÇÃO por SUAVIDADE, e não custa banda nenhuma: o ritmo
+    /// é um campo no cabeçalho do tema.
+    ///
+    /// Existe porque não há número certo para todos: um anel girando pede 24
+    /// quadros por segundo, e uma paisagem em movimento lento fica ridícula
+    /// nesse ritmo.
+    /// </remarks>
+    private void AoMudarVelocidade(object remetente, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_montando) return;
+
+        int fps = (int)Velocidade.Value;
+        _servico.AtrasoEscolhido = 1000 / fps;
+        MostrarVelocidade(fps);
+    }
+
+    private void MostrarVelocidade(int fps)
+    {
+        // O segundo número é o que a pessoa realmente compara: quanto tempo o
+        // laço dura com os quadros que ela tem.
+        double segundos = _servico.QuadrosCarregados / (double)fps;
+        ValorVelocidade.Text = $"{fps} fps · {segundos:0.0} s";
     }
 
     private void AoMudarContorno(object remetente, RoutedPropertyChangedEventArgs<double> e)

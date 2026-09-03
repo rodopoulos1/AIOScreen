@@ -65,7 +65,31 @@ public sealed class Servico : IAsyncDisposable
     /// aparece em lado nenhum porque isto não roda num laço apertado.
     /// </remarks>
     private List<byte[]> _fundos = new();
-    private int _atrasoMs = 100;
+    private int _atrasoMs = Conversor.AtrasoPadrao;
+
+    /// <summary>
+    /// Milissegundos entre quadros. Zero devolve o ritmo que veio da origem.
+    /// </summary>
+    /// <remarks>
+    /// É por tema porque não existe número certo para todos: um anel girando
+    /// pede 24 quadros por segundo, uma paisagem em movimento lento fica
+    /// ridícula nesse ritmo. O GIF traz o tempo dele; sequência de JPEG não traz
+    /// nada, e cai no padrão.
+    /// </remarks>
+    public int AtrasoEscolhido
+    {
+        get => _atrasoEscolhido;
+        set
+        {
+            _atrasoEscolhido = value;
+            if (value > 0) _atrasoMs = value;
+        }
+    }
+
+    private int _atrasoEscolhido;
+
+    /// <summary>O atraso que está valendo, escolhido ou vindo da origem.</summary>
+    public int AtrasoAtual => _atrasoMs;
 
     public Modo Modo { get; set; } = Modo.Animacao;
     public List<Widget> Widgets { get; set; } = Arranjos.Montar(0);
@@ -259,6 +283,11 @@ public sealed class Servico : IAsyncDisposable
                 ? (long)(QuadrosDoAoVivo() * (_fundos.Count > 0 ? _fundos[0].Length : 35000) * fator)
                 : (long)(_fundos.Sum(j => (long)j.Length) * fator);
 
+            // O envio nunca passa do teto: quadros a mais são descartados na
+            // montagem. Sem isto a estimativa prometia 40 s num tema que leva
+            // 38 e chega cortado.
+            bytes = Math.Min(bytes, TetoDoTema - Tema.TamanhoDosMetadados);
+
             return (bytes + Tema.TamanhoDosMetadados) / (double)Painel.BytesPorSegundo;
         }
     }
@@ -295,6 +324,55 @@ public sealed class Servico : IAsyncDisposable
             : Idioma.T("Enviado, mas a tela ainda não voltou. Reconectando..."));
     }
 
+    /// <summary>
+    /// Teto do tema que o painel aceita.
+    /// </summary>
+    /// <remarks>
+    /// O programa do fabricante recusa acima de 4 MB — a mensagem está no
+    /// binário dele, "theme size is greater than 4MB" — e o tema que ele mandou
+    /// na captura real pesava 3,23 MB. Aqui a margem é um pouco menor, porque
+    /// além dos quadros vão 4096 bytes de metadados e 4 por quadro.
+    /// </remarks>
+    public const int TetoDoTema = 3_800_000;
+
+    /// <summary>
+    /// Descarta quadros até o tema caber no painel.
+    /// </summary>
+    /// <remarks>
+    /// Sem isto, um tema grande simplesmente NÃO APARECE: o painel recusa e
+    /// segue mostrando o que já tinha, o que na tela parece um tema travado. Foi
+    /// o que aconteceu com os temas importados do fabricante — 120 quadros de
+    /// 480x480 dão perto de 6 MB.
+    ///
+    /// Descarta em passo constante, ao longo da animação inteira. Cortar o fim
+    /// seria mais simples e mostraria só o começo do movimento.
+    ///
+    /// O atraso NÃO é esticado de propósito: numa tela de 2 polegadas, uma
+    /// animação longa passando mais rápido é melhor do que a mesma animação
+    /// virando slideshow. Quem quiser a duração original tem o modo ao vivo.
+    /// </remarks>
+    private static List<byte[]> CaberNoPainel(List<byte[]> jpegs)
+    {
+        const int Cabecalho = 4096;
+        const int PorQuadro = 4;
+
+        long total = Cabecalho + jpegs.Sum(j => (long)j.Length + PorQuadro);
+        if (total <= TetoDoTema) return jpegs;
+
+        // Quantos cabem, pelo tamanho médio do que já foi codificado.
+        double medio = jpegs.Average(j => (double)j.Length + PorQuadro);
+        int cabem = Math.Max(1, (int)((TetoDoTema - Cabecalho) / medio));
+
+        var escolhidos = new List<byte[]>(cabem);
+        for (int i = 0; i < cabem; i++)
+            escolhidos.Add(jpegs[(int)((long)i * jpegs.Count / cabem)]);
+
+        Diario.Escrever($"tema: {jpegs.Count} quadros dariam {total / 1048576.0:0.0} MB, "
+                        + $"cortado para {cabem}");
+
+        return escolhidos;
+    }
+
     private byte[] MontarBlob()
     {
         lock (_trava)
@@ -318,7 +396,7 @@ public sealed class Servico : IAsyncDisposable
                     todos.Add(Conversor.ParaJpeg(q, QualidadeJpeg));
                 }
 
-                var blob = Tema.Montar(todos, _atrasoMs);
+                var blob = Tema.Montar(CaberNoPainel(todos), _atrasoMs);
                 Conversor.LiberarMemoria();
                 return blob;
             }
@@ -344,7 +422,7 @@ public sealed class Servico : IAsyncDisposable
                 ? _atrasoMs * _fundos.Count / quantos
                 : _atrasoMs;
 
-            return Tema.Montar(jpegs, atraso);
+            return Tema.Montar(CaberNoPainel(jpegs), atraso);
         }
     }
 

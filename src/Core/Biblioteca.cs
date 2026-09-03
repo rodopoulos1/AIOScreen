@@ -21,6 +21,16 @@ public sealed class Personalizado
     public Modo Modo { get; set; } = Modo.AoVivo;
     public List<Widget> Widgets { get; set; } = new();
 
+    /// <summary>
+    /// Milissegundos entre quadros. Zero usa o ritmo que veio da origem.
+    /// </summary>
+    /// <remarks>
+    /// Fica por tema porque não há número certo para todos: um anel girando pede
+    /// 24 quadros por segundo, uma paisagem em movimento lento fica ridícula
+    /// nesse ritmo. Zero é o padrão para não mexer no que já existia.
+    /// </remarks>
+    public int AtrasoMs { get; set; }
+
     public float Escurecer { get; set; } = 0.5f;
     public int QualidadeJpeg { get; set; } = 85;
     public int QuadrosAoVivo { get; set; } = 1;

@@ -105,6 +105,17 @@
                                        Width="42" Margin="8,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
 
+                        <StackPanel x:Name="CaixaDaVelocidade" Orientation="Horizontal" Margin="0,4,24,4">
+                            <TextBlock Text="Velocidade" Style="{StaticResource Etiqueta}"
+                                       Margin="0,0,10,0" VerticalAlignment="Center" />
+                            <Slider x:Name="Velocidade" Style="{StaticResource Deslizante}" Width="110"
+                                    Minimum="5" Maximum="24" Value="24" TickFrequency="1"
+                                    VerticalAlignment="Center" ValueChanged="AoMudarVelocidade"
+                                    ToolTip="Quadros por segundo. O painel guarda um número fixo de quadros, então mais rápido é mais suave e mais curto." />
+                            <TextBlock x:Name="ValorVelocidade" Style="{StaticResource Corpo}"
+                                       Width="64" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+
                         <CheckBox x:Name="MostrarGrade" Content="Grade" VerticalAlignment="Center"
                                   Margin="0,4,0,4" Click="AoMudarGrade"
                                   ToolTip="Guias de centro e terços, com encaixe ao arrastar" />

@@ -173,6 +173,12 @@ public partial class App : Application
             return;
         }
 
+        if (e.Args.Contains("--importar"))
+        {
+            Environment.Exit(ImportarSmartMonitor.Executar());
+            return;
+        }
+
         if (e.Args.Contains("--previa"))
         {
             int i = Array.IndexOf(e.Args, "--previa");
