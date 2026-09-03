@@ -62,6 +62,20 @@ public static class Protocolo
     /// dentro da imagem: reenviar os 2,5 MB do tema a cada segundo é inviável,
     /// então quem desenha número é o firmware do painel.
     /// </remarks>
+    /// <summary>Teto que o programa original impõe ao tempo de apagar (cmovg com 0x1E).</summary>
+    public const byte MaximoParaApagar = 30;
+
+    /// <summary>
+    /// Dia da semana na convenção do Qt: 1 = segunda ... 7 = domingo.
+    /// </summary>
+    /// <remarks>
+    /// O <see cref="DayOfWeek"/> do .NET começa no domingo com ZERO, e usar ele
+    /// cru deixaria o domingo indistinguível de "sem dia" e empurraria todos os
+    /// outros dias uma casa.
+    /// </remarks>
+    private static int DiaDaSemana(DateTime q)
+        => q.DayOfWeek == System.DayOfWeek.Sunday ? 7 : (int)q.DayOfWeek;
+
     public static byte[] MontarTelemetria(Telemetria t)
     {
         // 1 marcador + 6 de data/hora + 2 constantes + 21 campos de 3 bytes
@@ -78,10 +92,23 @@ public static class Protocolo
         payload[i++] = (byte)q.Minute;
         payload[i++] = (byte)q.Second;
 
-        // 0x2B nunca variou em captura nenhuma e continua sem significado
-        // conhecido. Mantido igual ao original de propósito: mexer no que não
-        // se entende é como se descobre que era importante.
-        payload[i++] = 0x2B;
+        // Este byte junta DUAS coisas, e passou muito tempo aqui como a
+        // constante 0x2B "sem significado conhecido". Ele é:
+        //
+        //     dia da semana  +  minutos para apagar o backlight * 8
+        //
+        // ou seja, os 3 bits de baixo são o dia (1=segunda .. 7=domingo, a
+        // convenção do Qt) e os 5 de cima são o tempo, que o programa original
+        // limita a 30.
+        //
+        // Foi lido do SmartMonitorX28.exe, na montagem do mesmo pacote:
+        //
+        //     movzx edx, byte ptr [r15 + 0x81]   ; o blTurnOffTime do config.ini
+        //     lea   edx, [r14 + rdx*8]           ; r14 = QDate::dayOfWeek()
+        //
+        // Confere com a captura real: 0x2B = 43 = 3 + 5*8, numa quarta-feira,
+        // com o config.ini do fabricante em time=5.
+        payload[i++] = (byte)(DiaDaSemana(q) + (Math.Min(t.MinutosParaApagar, MaximoParaApagar) << 3));
         payload[i++] = t.Brilho;
 
         for (int c = 0; c < QuantidadeDeCampos; c++)
@@ -149,6 +176,20 @@ public sealed class Telemetria
 
     /// <summary>0 a 100. Bate com o <c>brightness</c> do programa original.</summary>
     public byte Brilho { get; set; } = 100;
+
+    /// <summary>
+    /// Minutos até o firmware apagar o backlight, 0 a 30.
+    /// </summary>
+    /// <remarks>
+    /// É o <c>blTurnOffTime</c> do programa original, que trazia 5 de fábrica —
+    /// e é a única forma conhecida de APAGAR a tela de verdade. Brilho 0 só
+    /// pinta preto: o LCD continua iluminado por trás, e dá para ver.
+    ///
+    /// O firmware conta esse tempo sozinho, então o valor vale mesmo depois de
+    /// o PC desligar. É isso que faz a tela não passar a noite acesa na energia
+    /// de espera do USB.
+    /// </remarks>
+    public byte MinutosParaApagar { get; set; } = 5;
 
     public ushort[] Campos { get; } = new ushort[Protocolo.QuantidadeDeCampos];
 

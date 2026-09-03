@@ -90,7 +90,12 @@ public partial class JanelaPrincipal : Window
         Application.Current.SessionEnding += (_, _) =>
         {
             _saindoDeVerdade = true;
-            if (_cfg.ManterTelaNoDesligamento) return;
+
+            if (_cfg.ManterTelaNoDesligamento)
+            {
+                _servico.ManterAcesa();
+                return;
+            }
 
             // Aqui o Windows está com pressa: passou do tempo dele, o processo
             // morre no meio. Por isso a espera do painel é mais curta que a de
@@ -1177,7 +1182,13 @@ public partial class JanelaPrincipal : Window
         // A janela segue aberta aqui de propósito: enquanto ela existe o
         // Dispatcher continua vivo, e é ele que devolve o controle depois de
         // cada await abaixo.
-        if (!_cfg.ManterTelaAoFechar)
+        if (_cfg.ManterTelaAoFechar)
+        {
+            // Zera o tempo de apagar automático, senão o painel apagaria sozinho
+            // alguns minutos depois — justamente o contrário do que a opção diz.
+            _servico.ManterAcesa();
+        }
+        else
         {
             Rodape("Apagando a tela...");
             try { await _servico.ApagarAsync(); } catch { }

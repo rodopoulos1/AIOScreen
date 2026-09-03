@@ -53,13 +53,38 @@ implementations.
 ### `0x66` — telemetry, 77 bytes, about 1×/s
 
 ```
-66 | 00 4D | 01 | AA MM DD hh mm ss | 2B | BB | (idx:1B + value:2B BE) × 21 | CRC
+66 | 00 4D | 01 | AA MM DD hh mm ss | DT | BB | (idx:1B + value:2B BE) × 21 | CRC
 ```
 
 - `AA MM DD hh mm ss` — year (minus 2000), month, day, hour, minute, second
-- `2B` — constant across all captures, purpose unknown
+- `DT` — **two fields packed into one byte**:
+  - bits 0-2: day of week, `1` = Monday … `7` = Sunday (Qt's `QDate::dayOfWeek()`)
+  - bits 3-7: **minutes of idleness before the firmware kills the backlight**,
+    `0`-`30`. The vendor software calls it `blTurnOffTime` and ships it at `5`
 - `BB` — brightness, 0 to 100
 - 21 sensor fields, indices `0x01` through `0x15`
+
+**`DT` is the only known way to actually turn the screen off.** Brightness `0`
+paints black but leaves the backlight burning — you can see the lit black of the
+LCD. The timer is counted by the *firmware*, so it keeps running after the host
+stops talking, and after the PC powers down.
+
+That byte reads as a constant `0x2B` in every capture only because the vendor's
+default never changes: `3 + 5×8`, on a Wednesday, with `blTurnOffTime = 5`.
+
+It was recovered from the vendor binary, at the same packet's assembly:
+
+```
+movzx edx, byte ptr [r15 + 0x81]   ; blTurnOffTime, read from config.ini
+lea   edx, [r14 + rdx*8]           ; r14 = QDate::dayOfWeek()
+call  rdi                          ; append to the packet
+movsx edx, byte ptr [r15 + 0x80]   ; brightness, appended right after
+```
+
+with the write side clamping the value: `cmp ebx, 0x1e` / `cmovg ebx, edx`.
+
+`0` is assumed to mean "never turn off" — the vendor clamps only the ceiling and
+treats `0` like any other value. That reading is **not confirmed on hardware**.
 
 **The screen renders on its own.** It doesn't receive an image every second,
 just these numbers. That's why it stays lit and updating even with the PC
@@ -136,12 +161,28 @@ the visuals.
 
 ## Turning off the screen
 
-**Not yet confirmed.** The panel stays lit with the PC off because the
-motherboard keeps 5V standby power on the USB port.
+The panel stays lit with the PC off because the motherboard keeps 5 V standby
+power on the USB port. There is no "off" command — what exists is a **backlight
+idle timer**, in the `DT` byte of the `0x66` telemetry packet described above.
 
-AIOScreen tries two things on shutdown, neither of them captured from the
-original software: telemetry with **brightness 0** and a **black frame**. If
-you find the real command, open an issue.
+Set it to `1` and the backlight dies about a minute after the host stops
+talking. The firmware counts it, so quitting the app or powering the PC down
+does not stop the countdown — which is exactly what makes it work.
+
+Things that do **not** turn the screen off, both tested on hardware:
+
+| Attempt | What actually happens |
+|---|---|
+| brightness `0` | paints black, backlight stays on — the lit black of an LCD |
+| uploading an all-black frame | same, and it restarts the panel, which resets brightness |
+
+Brightness and backlight are separate in the firmware: brightness is how much
+the LCD lets through, the backlight is the lamp behind it. Zeroing the first
+never touches the second.
+
+One thing is still unconfirmed: whether `0` means *never turn off* or *turn off
+now*. The vendor clamps only the ceiling (`30`) and gives `0` no special
+handling, so "never" is the reading — but nobody has watched a panel to be sure.
 
 ## Compatibility
 

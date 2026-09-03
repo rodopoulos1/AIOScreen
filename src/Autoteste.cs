@@ -53,6 +53,8 @@ public static class Autoteste
         falhas += Conferir(saida, "telemetria 0x66",
             Protocolo.MontarTelemetria(TelemetriaCapturada()), TelemetriaReal);
 
+        falhas += ConferirBacklight(saida);
+
         var pedaco = Protocolo.MontarPedacoDeTema(
             0, TamanhoDoTemaReal, VerificadorDoTemaReal, new byte[Protocolo.TamanhoDoPedaco]);
         falhas += Conferir(saida, "cabeçalho de pedaço", pedaco.Take(14).ToArray(), CabecalhoReal);
@@ -176,6 +178,57 @@ public static class Autoteste
         j[0] = 0xFF; j[1] = 0xD8;
         j[^2] = 0xFF; j[^1] = 0xD9;
         return j;
+    }
+
+    /// <summary>
+    /// Trava a decodificação do byte que junta dia da semana e tempo de apagar.
+    /// </summary>
+    /// <remarks>
+    /// A telemetria inteira já é comparada contra a captura real, e aquilo
+    /// sozinho prova que quarta + 5 minutos dá 0x2B. Só que QUALQUER conta que
+    /// resultasse em 0x2B passaria naquele teste.
+    ///
+    /// Aqui os dois campos são movidos separadamente, para provar que são
+    /// mesmo dois campos e não uma coincidência — e para que quem mexer nisso
+    /// depois quebre o teste em vez de quebrar o hardware calado.
+    /// </remarks>
+    private static int ConferirBacklight(StringBuilder saida)
+    {
+        // 2 de setembro de 2026 é quarta-feira: dia 3 na convenção do Qt.
+        var quarta = new DateTime(2026, 9, 2, 9, 27, 28);
+        var domingo = new DateTime(2026, 9, 6, 9, 27, 28);
+
+        (string nome, DateTime quando, byte minutos, byte esperado)[] casos =
+        {
+            ("quarta + 5 min (o da captura real)", quarta,   5,  0x2B),
+            ("quarta + 1 min (o de apagar)",       quarta,   1,  0x0B),
+            ("quarta + 0 min (nunca apagar)",      quarta,   0,  0x03),
+            ("domingo + 5 min",                    domingo,  5,  0x2F),
+            ("teto: 40 vira 30",                   quarta,  40,  0xF3),
+        };
+
+        int falhas = 0;
+        foreach (var (nome, quando, minutos, esperado) in casos)
+        {
+            var pacote = Protocolo.MontarTelemetria(
+                new Telemetria { Quando = quando, MinutosParaApagar = minutos });
+
+            // opcode(1) + tamanho(2) + marcador(1) + data/hora(6) = 10
+            byte obtido = pacote[10];
+
+            if (obtido == esperado)
+            {
+                saida.AppendLine($"  ok      backlight: {nome} = 0x{obtido:X2}");
+            }
+            else
+            {
+                saida.AppendLine($"  FALHOU  backlight: {nome}");
+                saida.AppendLine($"            gerado 0x{obtido:X2}, esperado 0x{esperado:X2}");
+                falhas++;
+            }
+        }
+
+        return falhas;
     }
 
     private static Telemetria TelemetriaCapturada()

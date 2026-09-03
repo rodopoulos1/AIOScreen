@@ -42,6 +42,22 @@ public sealed class Configuracao
     public bool MinimizarAoFechar { get; set; } = true;
 
     /// <summary>
+    /// Minutos de ociosidade até o painel apagar o próprio backlight, 0 a 30.
+    /// </summary>
+    /// <remarks>
+    /// Quem conta é o FIRMWARE do painel, não o app — o valor viaja em todo
+    /// pacote de telemetria. É por isso que ele continua valendo com o PC
+    /// desligado, e é a única forma conhecida de apagar a tela de verdade:
+    /// brilho 0 só pinta preto, com o LCD aceso por trás.
+    ///
+    /// 5 é o padrão que vinha no programa do fabricante.
+    ///
+    /// NÃO tem relação nenhuma com a bomba: isto é backlight de display. A bomba
+    /// é alimentada pelo header da placa-mãe, não por este cabo.
+    /// </remarks>
+    public byte MinutosParaApagarBacklight { get; set; } = 5;
+
+    /// <summary>
     /// Deixa a tela tocando depois de sair do programa. Ligado por padrão.
     /// </summary>
     /// <remarks>

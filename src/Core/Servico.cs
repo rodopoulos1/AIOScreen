@@ -85,6 +85,16 @@ public sealed class Servico : IAsyncDisposable
 
     public event Action<EstadoDoServico>? Mudou;
 
+    /// <summary>
+    /// Minutos até o firmware apagar o backlight sozinho, 0 a 30.
+    /// </summary>
+    /// <remarks>
+    /// Vai em todo pacote de telemetria. Quem conta é o painel, não o app — por
+    /// isso continua valendo com o PC desligado, que é exatamente o caso que
+    /// motivou o projeto.
+    /// </remarks>
+    public byte MinutosParaApagar { get; set; } = 5;
+
     public bool Ligado => _painel.Ligado;
     public string? Porta => _painel.NomeDaPorta;
     public bool ComElevacao => _leitor.ComElevacao;
@@ -95,6 +105,7 @@ public sealed class Servico : IAsyncDisposable
     /// <summary>Passa as configurações para quem depende delas.</summary>
     public void Aplicar(Configuracao cfg)
     {
+        MinutosParaApagar = cfg.MinutosParaApagarBacklight;
         _leitor.GpuPreferida = cfg.GpuPreferida;
         Compositor.LimiteQuente = cfg.LimiteQuente;
         Brilho = cfg.Brilho;
@@ -378,10 +389,39 @@ public sealed class Servico : IAsyncDisposable
     /// Agora vai o quadro preto, espera-se o painel voltar, e só então o brilho —
     /// que não tem mais nenhum reinício pela frente para desfazê-lo.
     ///
-    /// RESSALVA: brilho 0 é HIPÓTESE. O comando real de desligar nunca foi
-    /// capturado do software do fabricante, porque ele não tem esse botão. Pode
-    /// ser que a tela fique preta e acesa em vez de apagada.
+    /// Brilho 0 sozinho NÃO apaga: pinta preto e o LCD segue iluminado por trás.
+    /// Foi testado no hardware. Quem apaga de verdade é o tempo de backlight,
+    /// que vai no mesmo pacote e é contado pelo FIRMWARE — por isso continua
+    /// valendo depois de o app fechar e depois de o PC desligar.
     /// </remarks>
+    /// <summary>
+    /// Diz ao firmware para NÃO apagar o backlight sozinho.
+    /// </summary>
+    /// <remarks>
+    /// Usado quando a pessoa quer a animação rodando depois de fechar o app ou
+    /// de desligar o PC. Sem isto o tempo normal continuaria valendo e a tela
+    /// apagaria no meio da noite mesmo com a opção marcada.
+    ///
+    /// Zero como "nunca apagar" é a convenção do campo; o programa do fabricante
+    /// só limita o teto (30) e aceita o zero sem tratar como caso especial.
+    /// </remarks>
+    public void ManterAcesa()
+    {
+        if (!_painel.Ligado) return;
+
+        try
+        {
+            _painel.Enviar(Protocolo.MontarTelemetria(new Telemetria
+            {
+                Quando = DateTime.Now,
+                Brilho = Brilho,
+                MinutosParaApagar = 0,
+            }));
+            _painel.EsperarEnvio();
+        }
+        catch { }
+    }
+
     public async Task ApagarAsync(TimeSpan? esperaDoPainel = null, CancellationToken ct = default)
     {
         if (!_painel.Ligado) return;
@@ -405,8 +445,16 @@ public sealed class Servico : IAsyncDisposable
                                                esperaDoPainel ?? TimeSpan.FromSeconds(12), ct))
                 return;
 
-            _painel.Enviar(Protocolo.MontarTelemetria(
-                new Telemetria { Quando = DateTime.Now, Brilho = 0 }));
+            // Brilho 0 pinta preto AGORA; o tempo 1 faz o firmware cortar o
+            // backlight logo em seguida, e é ele que apaga de verdade. Os dois
+            // juntos porque cobrem coisas diferentes: um é instantâneo e
+            // incompleto, o outro é completo e leva até um minuto.
+            _painel.Enviar(Protocolo.MontarTelemetria(new Telemetria
+            {
+                Quando = DateTime.Now,
+                Brilho = 0,
+                MinutosParaApagar = 1,
+            }));
             _painel.EsperarEnvio();
         }
         catch { }
@@ -476,7 +524,12 @@ public sealed class Servico : IAsyncDisposable
 
     private void MandarTelemetria(Leitura l)
     {
-        var t = new Telemetria { Quando = l.Quando, Brilho = Brilho };
+        var t = new Telemetria
+        {
+            Quando = l.Quando,
+            Brilho = Brilho,
+            MinutosParaApagar = MinutosParaApagar,
+        };
 
         // O significado exato dos 21 campos não está todo decifrado, e com os
         // widgets do firmware zerados nada disso é desenhado. Vai preenchido
