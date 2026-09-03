@@ -13,12 +13,12 @@ jeito que quiser.
 
 [English](README.md) · [Protocolo](docs/protocol.md) · [Compatibilidade](docs/compatibility.md) · [O que ele toca](docs/what-it-touches.md)
 
-![Janela principal do AIOScreen](https://dev.rodopoulos.xyz/imagens/aioscreen/aioscreen-home.png)
+![Janela principal do AIOScreen](https://dev.rodopoulos.xyz/imagens/aioscreen/aioscreen-home-2026-09-03.png)
 
 Escolha o tema, veja exatamente como o painel vai desenhar, e envie. As leituras
 de CPU, GPU, memória e temperatura ficam embaixo da prévia.
 
-![Editor do AIOScreen](https://dev.rodopoulos.xyz/imagens/aioscreen/aioscreen-editor.png)
+![Editor do AIOScreen](https://dev.rodopoulos.xyz/imagens/aioscreen/aioscreen-editor-2026-09-03.png)
 
 O editor: arraste os elementos, use as bolinhas para redimensionar, dê dois
 cliques no texto para editar ali mesmo, reordene como camadas. A tela é o painel

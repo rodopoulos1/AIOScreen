@@ -176,6 +176,22 @@ sending `1` while still streaming does nothing; sending `1` and then going quiet
 turns the backlight off. There is no "off right now" command — going silent *is*
 the command.
 
+Two more things confirmed on hardware, both worth knowing before you build this
+into a shutdown path:
+
+- **At PC shutdown the backlight dies immediately**, not after the minute the
+  value nominally asks for. Losing the host outright is not the same as an idle
+  host, and the firmware treats it as such.
+- **Send the telemetry first, the black frame second.** A theme upload restarts
+  the panel and the restart costs seconds; Windows will not wait for it. Order
+  the other way round and the shutdown gets cut off before the timer value ever
+  reaches the panel — the screen ends up black from brightness `0` and still
+  lit, which looks exactly like the bug you were trying to fix.
+
+On the way back up, the panel only lights once Windows has enumerated USB. Other
+peripherals with their own controllers (RGB and such) come on far earlier in
+POST. There is nothing a host-side client can do about that.
+
 Things that do **not** turn the screen off, both tested on hardware:
 
 | Attempt | What actually happens |

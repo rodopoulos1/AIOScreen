@@ -457,7 +457,8 @@ public sealed class Servico : IAsyncDisposable
         catch { }
     }
 
-    public async Task ApagarAsync(TimeSpan? esperaDoPainel = null, CancellationToken ct = default)
+    public async Task ApagarAsync(TimeSpan? esperaDoPainel = null, bool semQuadroPreto = false,
+                                  CancellationToken ct = default)
     {
         if (!_painel.Ligado) return;
 
@@ -467,38 +468,60 @@ public sealed class Servico : IAsyncDisposable
         TelemetriaPausada = true;
         MinutosParaApagar = 1;
 
+        // PRIMEIRO o pacote que apaga. São 77 bytes, sai em milissegundos e não
+        // reinicia o painel.
+        //
+        // Ele era o ÚLTIMO da fila, depois de subir um quadro preto e esperar o
+        // painel reiniciar. Pela bandeja dava certo, porque havia 12 s de folga.
+        // No desligamento do Windows não há: o teto de 5 s estourava, a função
+        // saía no return, e o tempo=1 nunca era enviado. A tela ficava preta
+        // pelo brilho 0 e ACESA, que foi exatamente o relato.
+        if (!MandarApagamento()) return;
+
+        // Daqui para baixo é acabamento, e pode não acontecer. O quadro preto
+        // evita que a animação apareça de relance se o painel religar antes do
+        // tempo — mas ele custa um reinício, e o que apaga já foi.
+        if (semQuadroPreto) return;
+
         try
         {
             using var preto = new Image<Rgba32>(Protocolo.LarguraDoPainel, Protocolo.AlturaDoPainel,
                                                 SixLabors.ImageSharp.Color.Black);
             var blob = Tema.Montar(new[] { Conversor.ParaJpeg(preto, 50) }, 100);
             foreach (var p in Tema.Empacotar(blob)) _painel.Enviar(p);
-
-            // Sem isto a porta fecha com o quadro preto ainda na fila do driver,
-            // e a tela continua na animação anterior.
             _painel.EsperarEnvio();
-        }
-        catch { return; }
 
+            // O reinício do tema pode devolver o tempo ao padrão do firmware,
+            // então o apagamento é repetido depois que o painel volta.
+            if (await _painel.ReconectarAsync(_baudEscolhido,
+                                              esperaDoPainel ?? TimeSpan.FromSeconds(12), ct))
+                MandarApagamento();
+        }
+        catch { }
+    }
+
+    /// <summary>Brilho 0 e tempo 1, num pacote só. Devolve se conseguiu enviar.</summary>
+    private bool MandarApagamento()
+    {
         try
         {
-            if (!await _painel.ReconectarAsync(_baudEscolhido,
-                                               esperaDoPainel ?? TimeSpan.FromSeconds(12), ct))
-                return;
-
-            // Brilho 0 pinta preto AGORA; o tempo 1 faz o firmware cortar o
-            // backlight logo em seguida, e é ele que apaga de verdade. Os dois
-            // juntos porque cobrem coisas diferentes: um é instantâneo e
-            // incompleto, o outro é completo e leva até um minuto.
             _painel.Enviar(Protocolo.MontarTelemetria(new Telemetria
             {
                 Quando = DateTime.Now,
                 Brilho = 0,
                 MinutosParaApagar = 1,
             }));
+
+            // Sem isto a porta fecha com o pacote ainda na fila do driver.
             _painel.EsperarEnvio();
+            Diario.Escrever("apagar: brilho 0 e tempo 1 enviados");
+            return true;
         }
-        catch { }
+        catch (Exception e)
+        {
+            Diario.Escrever($"apagar: FALHOU ao enviar — {e.Message}");
+            return false;
+        }
     }
 
     // ---------------------------------------------------------------- laço

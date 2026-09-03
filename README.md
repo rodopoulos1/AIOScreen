@@ -13,12 +13,12 @@ it however you want.
 
 [Português](README.pt-BR.md) · [Protocol](docs/protocol.md) · [Compatibility](docs/compatibility.md) · [What it touches](docs/what-it-touches.md)
 
-![AIOScreen main window](https://dev.rodopoulos.xyz/imagens/aioscreen/aioscreen-home.png)
+![AIOScreen main window](https://dev.rodopoulos.xyz/imagens/aioscreen/aioscreen-home-2026-09-03.png)
 
 Pick a theme, see it exactly as the panel will render it, send it. Live CPU, GPU,
 RAM and temperature readings sit under the preview.
 
-![AIOScreen editor](https://dev.rodopoulos.xyz/imagens/aioscreen/aioscreen-editor.png)
+![AIOScreen editor](https://dev.rodopoulos.xyz/imagens/aioscreen/aioscreen-editor-2026-09-03.png)
 
 The editor: drag elements around, grab the handles to resize, double-click text
 to edit it in place, reorder as layers. The canvas is the real 480 × 480 panel,

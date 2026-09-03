@@ -128,10 +128,15 @@ public partial class JanelaPrincipal : Window
             //
             // Task.Run tira do fio da interface de propósito: bloquear a
             // interface esperando um await que precisa dela é travar de vez.
+            // Sem o quadro preto aqui, de propósito. Ele custa um reinício do
+            // painel e uma reconexão, e o Windows não dá esse tempo — era o que
+            // fazia a tela ficar preta e ACESA ao desligar. O brilho 0 já deixa
+            // preto, e o tempo 1 apaga em seguida, contado pelo firmware, com o
+            // PC desligado.
             try
             {
-                Task.Run(() => _servico.ApagarAsync(TimeSpan.FromSeconds(5)))
-                    .Wait(TimeSpan.FromSeconds(8));
+                Task.Run(() => _servico.ApagarAsync(semQuadroPreto: true))
+                    .Wait(TimeSpan.FromSeconds(4));
             }
             catch { }
         };
