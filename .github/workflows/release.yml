@@ -49,28 +49,39 @@ jobs:
         shell: pwsh
         run: ./tools/gerar-instalador.ps1
 
-      - name: Name the artifact after the tag
+      # Zipped, not the bare .exe. Browsers and mail gateways treat a downloaded
+      # executable far more harshly than an archive, and the build is unsigned
+      # to begin with — one less warning between someone and a working panel.
+      # The checksum ships next to it because there is no signature to check.
+      - name: Zip the installer and checksum it
         id: nome
         shell: bash
         run: |
-          arquivo=$(ls installer-output/*.exe | head -1)
-          echo "caminho=$arquivo" >> "$GITHUB_OUTPUT"
-          echo "nome=$(basename "$arquivo")" >> "$GITHUB_OUTPUT"
+          exe=$(ls installer-output/*.exe | head -1)
+          base=$(basename "$exe" .exe)
+          (cd installer-output && 7z a -tzip "$base.zip" "$(basename "$exe")" >/dev/null)
+          (cd installer-output && sha256sum "$base.zip" "$(basename "$exe")" > SHA256SUMS.txt)
+          echo "zip=installer-output/$base.zip" >> "$GITHUB_OUTPUT"
+          echo "nome=$base.zip" >> "$GITHUB_OUTPUT"
+          cat installer-output/SHA256SUMS.txt
 
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.nome.outputs.nome }}
-          path: ${{ steps.nome.outputs.caminho }}
+          path: ${{ steps.nome.outputs.zip }}
 
       # Only on a tag. A manual run stops at the artifact above.
       - name: Publish the release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ steps.nome.outputs.caminho }}
+          files: |
+            ${{ steps.nome.outputs.zip }}
+            installer-output/SHA256SUMS.txt
           generate_release_notes: true
           body: |
-            Download `${{ steps.nome.outputs.nome }}` below and run it.
+            Download `${{ steps.nome.outputs.nome }}` below, unzip it and run
+            the installer.
 
             Setup asks for administrator **once**. That is what creates the
             scheduled task that starts AIOScreen elevated — without it, Windows
