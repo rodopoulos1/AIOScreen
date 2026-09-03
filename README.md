@@ -48,9 +48,14 @@ On top of that, its editor is rigid and the software is not maintained.
   text in place, reorder as layers, snap to a grid
 - **Four shapes** per element: number, arc, bar and ring
 - **Saved themes** with thumbnails — pick one and send it
-- **Starts with Windows** through a scheduled task: elevated, **no UAC prompt
-  after install**
-- **Lives in the tray** using 21 MB of RAM and 0% CPU
+- **The preview is live** — same renderer as the panel, same pixels, updating
+  every second. What you see is what gets sent
+- **Never asks for administrator.** Setup asks once; after that the app reopens
+  itself elevated through the scheduled task, silently. Elevation is what makes
+  CPU temperature readable at all
+- **Lives in the tray** at 21 MB of RAM and 0% CPU. With the window open it sits
+  around 77 MB — that is the live preview being rendered, and it stops the
+  moment you minimise or send it to the tray
 - **Actually turns the screen off** when you quit or shut down — backlight dead,
   not just a black frame. That is the default, because a panel glowing all night
   on USB standby power is what started this project. Both are settings: leave the

@@ -23,9 +23,10 @@ The source code is in this repository: everything below can be verified.
 | Opens a serial port | whichever one has `VID_1A86&PID_8040` | it's the cooler's screen |
 | Reads sensors | CPU, GPU, memory | these are the numbers that go on the screen |
 | Writes configuration | `%LOCALAPPDATA%\AIOScreen` | saved preferences and themes |
+| Writes a log | `%LOCALAPPDATA%\AIOScreen\log.txt` | startup decisions and errors, capped at 512 KB, **stays on your machine** |
 | Temporary files | `%TEMP%\AIOScreen` | only when converting video, deleted afterward |
 | Reads the image you pick | wherever you point it | it's the screen's content |
-| Scheduled task, if you enable it | `AIOScreen` in Task Scheduler | to start along with Windows |
+| Scheduled task, if you enable it | `AIOScreen` in Task Scheduler | to start with Windows, and to reopen itself elevated |
 
 ## The two things that deserve an explanation
 
@@ -43,6 +44,16 @@ enumerated yet.
 The task is created only if you check the option, and removed when you
 uncheck it.
 
+**The task is also how a manual launch gets elevated.** A shortcut runs the app
+as a normal user, and a normal user cannot read CPU temperature — it would just
+show `--` with nothing explaining why. So when AIOScreen starts unelevated and
+the task exists, it asks the Task Scheduler to start it again and exits. No
+prompt, because the installer already asked once. That is the whole point of
+asking once.
+
+If the task is missing, the app runs unelevated rather than nagging you: you
+lose CPU temperature and nothing else.
+
 ### Why it reads temperature with a driver
 
 Through `LibreHardwareMonitorLib`, a well-known open library
@@ -50,6 +61,10 @@ Through `LibreHardwareMonitorLib`, a well-known open library
 that loads the sensor-reading driver. Without elevation it doesn't load, and
 the app keeps working — it shows usage, clock speed, and memory, and leaves
 temperature as `--` instead of making up a number.
+
+Only **CPU** temperature needs that driver. GPU temperature comes from the
+vendor's own API and works fine without any of this, which is why an unelevated
+AIOScreen can show you a GPU reading and a `--` for the CPU in the same row.
 
 ## If your antivirus complains
 

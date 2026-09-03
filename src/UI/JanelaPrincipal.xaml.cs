@@ -153,6 +153,15 @@ public partial class JanelaPrincipal : Window
         AtualizarBotoesDeTema();    // "Salvar como..." / "Trocar imagem..."
         AtualizarBotoes();          // "Aplicar na tela"
 
+        // O nome do arquivo é escrito pelo código e não é traduzível. Sem isto,
+        // trocar de idioma o substituía pelo texto do XAML — a janela passava a
+        // dizer "nenhuma imagem escolhida" com o tema carregado e na tela.
+        NomeDoArquivo.Text = _arquivoAtual.Length > 0
+            ? System.IO.Path.GetFileName(_arquivoAtual)
+            : T("Nenhuma imagem escolhida");
+
+        if (_ultima is not null) MostrarLeitura(_ultima);
+
         Estado(_servico.Ligado,
                _servico.Ligado ? T("Tela em {0}", _servico.Porta ?? "?")
                                : T("Tela não encontrada"));
@@ -1170,9 +1179,12 @@ public partial class JanelaPrincipal : Window
                 _ultima = estado.Ultima;
                 MostrarLeitura(estado.Ultima);
 
-                // Escondido na bandeja não há o que repintar, e a prévia é a
-                // parte cara: uma composição de 480x480 a cada leitura.
-                if (IsVisible) PintarWidgetsDaPrevia();
+                // Repintar a prévia custa uma composição de 480x480 por leitura.
+                // Escondido na bandeja ou minimizado na barra, ninguém está
+                // olhando — e minimizado o IsVisible continua verdadeiro, então
+                // ele sozinho não basta.
+                if (IsVisible && WindowState != WindowState.Minimized)
+                    PintarWidgetsDaPrevia();
             }
 
             // Toda mensagem do serviço aparece no rodapé: é ela que conta o que
@@ -1251,11 +1263,22 @@ public partial class JanelaPrincipal : Window
         BotaoMaximizar.Content = WindowState == WindowState.Maximized ? GlifoRestaurar : GlifoMaximizar;
     }
 
+    /// <summary>
+    /// Minimizar é minimizar: a janela vai para a barra de tarefas, e fica lá.
+    /// </summary>
+    /// <remarks>
+    /// Antes daqui saía um <c>Esconder()</c>, e minimizar sumia com a janela
+    /// para a bandeja. Some da barra de tarefas, e quem clicou em minimizar
+    /// perde o caminho de volta que esperava.
+    ///
+    /// Ir para a bandeja é comportamento do FECHAR, e só quando a pessoa marcou
+    /// "fechar minimiza em vez de encerrar". São duas ações diferentes, e cada
+    /// uma faz o que o botão diz.
+    /// </remarks>
     private void AoMudarEstadoDaJanela(object? remetente, EventArgs e)
-    {
-        if (WindowState == WindowState.Minimized) _bandeja?.Esconder();
-        BotaoMaximizar.Content = WindowState == WindowState.Maximized ? GlifoRestaurar : GlifoMaximizar;
-    }
+        => BotaoMaximizar.Content = WindowState == WindowState.Maximized
+            ? GlifoRestaurar
+            : GlifoMaximizar;
 
     /// <summary>
     /// Solta o que só serve para a janela estar aberta.

@@ -52,9 +52,14 @@ Fora isso, o editor dele é engessado e o programa não recebe atualização.
   para redimensionar, edita texto no lugar, organiza em camadas, encaixa na grade
 - **Quatro formas** por elemento: número, arco, barra e anel
 - **Temas salvos** com miniatura — escolhe e manda
-- **Sobe com o Windows** por tarefa agendada: elevada, e **sem UAC depois da
-  instalação**
-- **Vive na bandeja** ocupando 21 MB de RAM e 0% de CPU
+- **A prévia é viva** — o mesmo renderizador do painel, os mesmos pixels,
+  atualizando a cada segundo. O que você vê é o que vai
+- **Nunca pede administrador.** O instalador pede uma vez; depois disso o app se
+  reabre elevado pela tarefa agendada, calado. É a elevação que faz a
+  temperatura da CPU ser legível
+- **Vive na bandeja** com 21 MB de RAM e 0% de CPU. Com a janela aberta fica em
+  torno de 77 MB — é a prévia viva sendo renderizada, e ela para no instante em
+  que você minimiza ou manda para a bandeja
 - **Apaga a tela de verdade** ao sair e ao desligar o PC — backlight cortado, não
   só um quadro preto. É o padrão, porque foi justamente o painel aceso a noite
   toda na energia de espera do USB que deu origem a este projeto. As duas coisas
