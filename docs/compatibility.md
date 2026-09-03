@@ -1,5 +1,12 @@
 # Compatible models
 
+Which AIO coolers and LCD panels AIOScreen can drive — and, just as usefully,
+which ones it cannot.
+
+If you got here searching for whether your cooler's screen works without
+**SmartMonitorX28**, the short answer is: it depends on the controller, not on
+the cooler brand. The check below takes ten seconds.
+
 ## How to tell if yours works
 
 What determines compatibility **isn't the screen's size or resolution** — it's

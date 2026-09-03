@@ -1,15 +1,32 @@
-# AIOScreen
+# AIOScreen — substituto do SmartMonitorX28 para telas de water cooler
 
 **Controle a telinha redonda do seu water cooler sem o software do fabricante.**
 
-Substituto completo do `SmartMonitorX28`, o programa que vem com o LCD redondo de
-2,1" e 480 × 480 usado em coolers como o SuperFrame Isengard. Coloque qualquer
-imagem, GIF ou vídeo no painel, desenhe temperatura e uso por cima, e monte do
-jeito que quiser.
+Substituto completo e aberto do **SmartMonitorX28** — o programa que vem com o
+LCD redondo de 2,1" e 480 × 480 de coolers como o **SuperFrame Isengard Magic
+360 / 240** e os vários rebadges do mesmo painel. Coloque qualquer imagem, GIF ou
+vídeo nele, desenhe leituras de CPU e GPU por cima, e monte do jeito que quiser.
 
-> **Projeto não oficial.** Sem ligação com nenhum fabricante. O protocolo serial
-> foi obtido por engenharia reversa — não existe documentação pública dele em
-> lugar nenhum. Use por sua conta e risco.
+### É isso que te trouxe aqui?
+
+Se alguma dessas for o seu caso, você está no lugar certo:
+
+| O problema | O que o AIOScreen faz |
+|---|---|
+| **O SmartMonitorX28 não inicia com o Windows** | sobe no logon por tarefa agendada, elevado, sem prompt |
+| **A solução do fabricante manda desligar o UAC** ou ativar a conta Administrador embutida | nunca pede para enfraquecer o Windows; o instalador pede admin uma vez e acabou |
+| **A tela do cooler continua acesa depois de desligar o PC** | apaga o backlight de verdade, não só pinta preto |
+| **A tela fica travada em um quadro** e o GIF não anima | contêiner de tema correto, conferido byte a byte contra captura real |
+| **O programa pede administrador toda vez** que abre | se reabre elevado pela tarefa agendada, calado |
+| **O SmartMonitorX28 está abandonado** — sem atualização, editor engessado, sem código | código aberto, editor de arrastar e soltar, e o protocolo documentado |
+| Você quer saber **o que o software do fabricante manda de verdade** | [`docs/protocol.md`](docs/protocol.md) — o formato inteiro |
+
+Não está na lista? [Abra uma issue](../../issues) com o modelo do seu cooler.
+
+> **Projeto não oficial.** Sem ligação com a SuperFrame nem com fabricante de
+> cooler ou de painel. O protocolo serial foi obtido por engenharia reversa —
+> não existe documentação pública dele em lugar nenhum. Use por sua conta e
+> risco.
 
 [English](README.md) · [Protocolo](docs/protocol.md) · [Compatibilidade](docs/compatibility.md) · [O que ele toca](docs/what-it-touches.md)
 
@@ -135,6 +152,41 @@ Para gerar o instalador também (precisa do [Inno Setup 6](https://jrsoftware.or
 ```bash
 pwsh -File tools/gerar-instalador.ps1
 ```
+
+## Problemas comuns
+
+Sintomas que aparecem de verdade nesses painéis, e o que está por trás.
+
+**A tela travou em um quadro — o GIF ou vídeo não anima.**
+O contêiner de tema junta os JPEGs com o tamanho de cada um na frente, em 32 bits
+big-endian, dentro de um bloco de 4096 bytes de metadados. Sem esses prefixos o
+firmware lê exatamente um quadro e repete ele para sempre, sem dar erro.
+O [`docs/protocol.md`](docs/protocol.md) tem o formato.
+
+**A tela continua acesa depois de desligar o PC.**
+A energia de espera do USB mantém o painel vivo. Não existe comando de desligar
+— o que existe é um temporizador de backlight dentro do pacote de telemetria, e o
+host precisa ajustá-lo *e então parar de falar*. É o que o AIOScreen faz ao sair
+e ao desligar.
+
+**A temperatura da CPU mostra `--`.**
+Ler isso exige um driver de kernel, e o driver exige elevação. Abrindo pelo
+atalho sem privilégio, aparecem uso e frequência mas não a temperatura. O
+AIOScreen se reabre elevado pela tarefa agendada, então você não deveria ver
+isso — se vir, a tarefa sumiu.
+
+**Aplicar um tema demora vários segundos.**
+O barramento anda a 1 Mbaud, cerca de 100 KB/s. Um GIF de 17 quadros dá uns
+900 KB, ou seja, uns 9 segundos. É o fio, não o programa.
+
+**O painel some do Gerenciador de Dispositivos a cada envio.**
+Normal. Ele re-enumera o USB ao reiniciar para mostrar o tema novo. Qualquer
+código que guarde o descritor da porta durante isso vai escrever numa porta
+morta.
+
+**A tela acende tarde quando o PC liga.**
+Ela só acende depois que o Windows enumera o USB. Periférico com controlador
+próprio acende no POST, bem antes. Não há o que fazer do lado do host.
 
 ## Sobre o aviso do Windows
 

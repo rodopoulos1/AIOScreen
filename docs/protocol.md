@@ -1,8 +1,10 @@
-# Screen protocol
+# Screen protocol — SmartMonitorX28 / CH340 round 480×480 AIO panel
 
-Documentation of the serial protocol for the round 2.1" screen that ships with
-water coolers, obtained through **reverse engineering** of the manufacturer's
-software in September 2026.
+Documentation of the serial protocol for the round 2.1" 480 × 480 screen that
+ships on AIO water coolers — the one driven by **SmartMonitorX28** over a
+**CH340 USB serial port** (`VID_1A86&PID_8040`), found on the SuperFrame Isengard
+Magic and its many rebadges. Obtained through **reverse engineering** of the
+manufacturer's software in September 2026.
 
 As far as I could find, **there was nothing public about this anywhere**. If
 you ended up here looking for how to talk to this panel, this document is

@@ -1,15 +1,31 @@
-# AIOScreen
+# AIOScreen — a SmartMonitorX28 replacement for AIO cooler LCD screens
 
-**Drive your AIO cooler's little round screen without the vendor software.**
+**Drive the round LCD on your liquid cooler without the vendor software.**
 
-A full replacement for `SmartMonitorX28`, the software that ships with the 2.1"
-round 480 × 480 LCD found on liquid coolers like the SuperFrame Isengard. Put any
-image, GIF or video on the panel, draw temperature and load on top, and arrange
-it however you want.
+A full, open replacement for **SmartMonitorX28** — the utility that ships with
+the 2.1" round 480 × 480 screen on coolers like the **SuperFrame Isengard Magic
+360 / 240** and the many rebadges of the same panel. Put any image, GIF or video
+on it, draw CPU and GPU readings on top, and lay it out however you want.
 
-> **Unofficial project.** Not affiliated with any manufacturer. The serial
-> protocol was obtained by reverse engineering — it is not publicly documented
-> anywhere else. Use at your own risk.
+### Is this what brought you here?
+
+If any of these matches what you are dealing with, you are in the right place:
+
+| The problem | What AIOScreen does about it |
+|---|---|
+| **SmartMonitorX28 doesn't start with Windows** | starts at logon through a scheduled task, elevated, no prompt |
+| **The vendor's fix tells you to disable UAC** or enable the built-in Administrator account | never asks you to weaken Windows; setup asks for admin once and that is the end of it |
+| **The cooler screen stays on after you shut down the PC** | turns the backlight off for real, not just a black frame |
+| **The screen is frozen on one frame** and the GIF won't animate | correct theme container, verified byte-for-byte against real captures |
+| **The app keeps asking for administrator** every single launch | reopens itself elevated through the scheduled task, silently |
+| **SmartMonitorX28 is abandoned** — no updates, rigid editor, no source | open source, drag-and-drop editor, and the protocol is documented |
+| You want to know **what the vendor software is actually sending** | [`docs/protocol.md`](docs/protocol.md) — the whole wire format |
+
+Not on the list? [Open an issue](../../issues) with your cooler model.
+
+> **Unofficial project.** Not affiliated with SuperFrame, or with any cooler or
+> panel manufacturer. The serial protocol was obtained by reverse engineering —
+> it is not publicly documented anywhere else. Use at your own risk.
 
 [Português](README.pt-BR.md) · [Protocol](docs/protocol.md) · [Compatibility](docs/compatibility.md) · [What it touches](docs/what-it-touches.md)
 
@@ -28,17 +44,23 @@ circular mask and all — what you see is what gets sent.
 
 ## Why this exists
 
-The stock software has two problems you hit every single day:
+Two problems with the stock software, both hit every single day.
 
-**It does not start with Windows.** And the vendor's own "fix" — a `read me.txt`
-shipped inside the install folder — tells you to enable the built-in
-Administrator account and **turn UAC off system-wide**. Tearing down Windows
-security so a 2-inch screen can autostart is not a fair trade.
+**SmartMonitorX28 does not start with Windows.** And the vendor's own fix — a
+`read me.txt` shipped inside the install folder — tells you to enable the
+built-in Administrator account and **turn UAC off system-wide**. Tearing down
+Windows security so a 2-inch screen can autostart is not a fair trade, and it is
+the kind of advice that should never appear in a `read me`.
 
-**The screen stays on after you shut down.** The motherboard keeps +5 V standby
-on USB, the panel keeps drawing what it last received, and it glows all night.
+**The cooler screen stays on after you shut down the PC.** The motherboard keeps
++5 V standby power on USB, the panel keeps displaying whatever it last received,
+and it glows all night. There is no setting for it in the vendor UI.
 
-On top of that, its editor is rigid and the software is not maintained.
+On top of that the editor is rigid, the software has not been updated, and there
+is no source to read.
+
+AIOScreen fixes both, and the reverse engineering behind it is written down so
+the next person does not have to start over.
 
 ## What AIOScreen does
 
@@ -86,8 +108,14 @@ Get-CimInstance Win32_PnPEntity -Filter "PNPClass='Ports'" |
 ```
 
 If that returns something, there is a good chance AIOScreen works. Another strong
-sign: the software that came with your cooler is called **SmartMonitor** (or
-`SmartMonitorX28`, or a numbered variant).
+sign: the software that came with your cooler is called **SmartMonitor** — you
+may know it as `SmartMonitorX28`, `SmartMonitor X28`, or a numbered variant, and
+it is a Qt application that talks to the panel over a **CH340 USB serial port**
+at 1 Mbaud.
+
+Panels of this family turn up under a lot of names — *AIO cooler LCD*, *2.1 inch
+round IPS screen*, *480x480 pump-head display*, *S021H480480* in the firmware
+file — and several of them are the same hardware with a different sticker.
 
 | Status | Model |
 |---|---|
@@ -131,6 +159,39 @@ To produce the installer as well (needs [Inno Setup 6](https://jrsoftware.org/is
 ```bash
 pwsh -File tools/gerar-instalador.ps1
 ```
+
+## Troubleshooting
+
+Symptoms people actually run into with these panels, and what is going on.
+
+**The screen is stuck on one frame — the GIF or video won't animate.**
+The theme container concatenates JPEG frames, each preceded by its length as a
+32-bit big-endian prefix, inside a 4096-byte metadata block. Drop the prefixes
+and the firmware reads exactly one frame and loops it forever, with no error.
+[`docs/protocol.md`](docs/protocol.md) has the layout.
+
+**The screen stays lit after shutting down the PC.**
+USB standby power keeps the panel alive. There is no "off" command — what exists
+is a backlight idle timer packed into the telemetry packet, and the host has to
+set it *and then stop talking*. AIOScreen does that on exit and on shutdown.
+
+**CPU temperature shows `--`.**
+Reading it needs a kernel driver, and the driver needs elevation. Launch the app
+from its shortcut without elevation and it will show usage and clock but no
+temperature. AIOScreen reopens itself elevated through the scheduled task, so
+you should not see this — if you do, the task is missing.
+
+**Applying a theme takes several seconds.**
+The bus runs at 1 Mbaud, about 100 KB/s. A 17-frame GIF is roughly 900 KB, so
+about 9 seconds. That is the wire, not the software.
+
+**The panel disappears from Device Manager after each upload.**
+Normal. It re-enumerates USB when it restarts to show the new theme. Anything
+that caches the port handle across that will end up writing into a dead one.
+
+**The screen lights up late when the PC boots.**
+It only comes on once Windows has enumerated USB. Peripherals with their own
+controllers light up in POST, long before. Nothing host-side can change that.
 
 ## About the Windows warning
 
