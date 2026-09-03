@@ -1,0 +1,59 @@
+{
+  "Id": "std-blue-halo",
+  "Nome": "Blue Halo",
+  "Arquivo": "blue-halo_0.jpg",
+  "Criado": "2026-01-01T22:00:00",
+  "Modo": "Animacao",
+  "Widgets": [
+    {
+      "Forma": "Numero",
+      "Fonte": "Hora",
+      "X": 240,
+      "Y": 96,
+      "Tamanho": 26,
+      "Cor": "C9BFBC",
+      "ComRotulo": false,
+      "Contorno": 0,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    },
+    {
+      "Forma": "Numero",
+      "Fonte": "CpuTemp",
+      "X": 240,
+      "Y": 232,
+      "Tamanho": 132,
+      "Cor": "4DD2FF",
+      "ComRotulo": true,
+      "Contorno": 0,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    },
+    {
+      "Forma": "Numero",
+      "Fonte": "GpuTemp",
+      "X": 240,
+      "Y": 348,
+      "Tamanho": 34,
+      "Cor": "C9BFBC",
+      "ComRotulo": true,
+      "Contorno": 0,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    }
+  ],
+  "Escurecer": 0.0,
+  "QualidadeJpeg": 85,
+  "QuadrosAoVivo": 1,
+  "IntervaloSegundos": 3,
+  "Zoom": 1,
+  "DeslocamentoX": 0,
+  "DeslocamentoY": 0,
+  "Cobrir": true
+}

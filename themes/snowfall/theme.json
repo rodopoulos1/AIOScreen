@@ -1,0 +1,59 @@
+{
+  "Id": "std-snowfall",
+  "Nome": "Snowfall",
+  "Arquivo": "snowfall_0.jpg",
+  "Criado": "2026-01-01T11:00:00",
+  "Modo": "Animacao",
+  "Widgets": [
+    {
+      "Forma": "Numero",
+      "Fonte": "Hora",
+      "X": 240,
+      "Y": 112,
+      "Tamanho": 46,
+      "Cor": "2C3A4E",
+      "ComRotulo": false,
+      "Contorno": 0,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    },
+    {
+      "Forma": "Numero",
+      "Fonte": "CpuTemp",
+      "X": 124,
+      "Y": 378,
+      "Tamanho": 28,
+      "Cor": "FFFFFF",
+      "ComRotulo": true,
+      "Contorno": 3,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    },
+    {
+      "Forma": "Numero",
+      "Fonte": "GpuTemp",
+      "X": 356,
+      "Y": 378,
+      "Tamanho": 28,
+      "Cor": "FFFFFF",
+      "ComRotulo": true,
+      "Contorno": 3,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    }
+  ],
+  "Escurecer": 0.1,
+  "QualidadeJpeg": 85,
+  "QuadrosAoVivo": 1,
+  "IntervaloSegundos": 3,
+  "Zoom": 1,
+  "DeslocamentoX": 0,
+  "DeslocamentoY": 0,
+  "Cobrir": true
+}

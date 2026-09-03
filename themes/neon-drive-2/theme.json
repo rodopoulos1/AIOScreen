@@ -1,0 +1,16 @@
+{
+  "Id": "std-neon-drive-2",
+  "Nome": "Neon Drive 2",
+  "Arquivo": "neon-drive-2_2.gif",
+  "Criado": "2026-01-01T17:00:00",
+  "Modo": "Animacao",
+  "Widgets": [],
+  "Escurecer": 0.0,
+  "QualidadeJpeg": 85,
+  "QuadrosAoVivo": 1,
+  "IntervaloSegundos": 3,
+  "Zoom": 1,
+  "DeslocamentoX": 0,
+  "DeslocamentoY": 0,
+  "Cobrir": true
+}

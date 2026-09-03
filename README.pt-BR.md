@@ -23,6 +23,7 @@ Se alguma dessas for o seu caso, você está no lugar certo:
 | **A tela fica travada em um quadro** e o GIF não anima | contêiner de tema correto, conferido byte a byte contra captura real |
 | **O programa pede administrador toda vez** que abre | se reabre elevado pela tarefa agendada, calado |
 | **O SmartMonitorX28 está abandonado** — sem atualização, editor engessado, sem código | código aberto, editor de arrastar e soltar, e o protocolo documentado |
+| **Você quer manter os temas** que já usa | 13 já vêm juntos, a maior parte com a arte do próprio SmartMonitorX28, e tem importador para o resto |
 | Você quer saber **o que o software do fabricante manda de verdade** | [`docs/protocol.md`](docs/protocol.md) — o formato inteiro |
 
 Não está na lista? [Abra uma issue](../../issues) com o modelo do seu cooler.
@@ -48,6 +49,40 @@ de 480 × 480 de verdade, com a máscara redonda — o que você vê é o que va
 > As capturas estão em inglês de propósito: é a língua que mais gente lê. O app
 > tem 24 idiomas, e a troca vale na hora.
 
+## 13 temas, prontos para mandar
+
+![Os 13 temas que já vêm com o AIOScreen](https://dev.rodopoulos.xyz/imagens/aioscreen/aioscreen-themes-2026-09-03.png)
+
+Eles são instalados no primeiro arranque e já aparecem na lista — sem passo de
+importação, sem nada para baixar. São temas normais: abra no editor e mova,
+recolora ou apague o que quiser.
+
+**A maior parte das imagens vem do próprio pacote do SmartMonitorX28** — as
+mesmas animações que acompanham o software do fabricante, para que trocar de
+programa não signifique perder a tela que você já tinha. Os layouts não: cada um
+foi refeito em cima da imagem dele, em vez de largar o mesmo mostrador em cima
+de tudo.
+
+Essa diferença é o ponto. O arranjo de fábrica põe um número grande no meio com
+dois arcos em volta, o que serve para imagem cheia e estraga o resto — cai na
+cara do cachorro, desenha arco em cima de arte que **já é** um anel, e escurece
+uma paisagem que só precisava do relógio. Então:
+
+- **Arte em anel** (Amber Ring, Blue Halo, Magenta Ring, Plasma Ring) não tem
+  arco nenhum. A arte é o medidor; o meio vazio recebe o número
+- **Arte com personagem** (Corgi, Raccoon) fica com o meio livre
+- **Paisagem** (Pastel Peaks, Snowfall) lê o relógio em tinta escura contra o
+  céu, em vez de branco sobre claro, e não leva escurecimento
+- **Só o Cyber City** ganha o arranjo completo, porque é o único cheio o
+  bastante para aguentar
+
+Se você já tinha importado esses temas do SmartMonitorX28, eles não entram em
+dobro — a comparação é por nome, e a sua cópia ganha.
+
+> As imagens que vêm no pacote pertencem aos autores originais e estão aqui por
+> compatibilidade com o painel para o qual foram feitas. Se você tem direito
+> sobre alguma e quer que saia, [abra uma issue](../../issues) e ela sai.
+
 ---
 
 ## Por que existe
@@ -72,6 +107,8 @@ Fora isso, o editor dele é engessado e o programa não recebe atualização.
   memória, RAM, relógio, data ou texto livre. Arrasta para mover, pega as alças
   para redimensionar, edita texto no lugar, organiza em camadas, encaixa na grade
 - **Quatro formas** por elemento: número, arco, barra e anel
+- **13 temas já vêm junto**, instalados no primeiro arranque — a maior parte da
+  arte é do próprio SmartMonitorX28, então trocar de programa não perde nada
 - **Temas salvos** com miniatura — escolhe e manda
 - **A prévia é viva** — o mesmo renderizador do painel, os mesmos pixels,
   atualizando a cada segundo. O que você vê é o que vai

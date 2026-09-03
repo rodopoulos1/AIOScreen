@@ -127,4 +127,94 @@ public static class Biblioteca
             try { if (File.Exists(f)) File.Delete(f); } catch { }
         }
     }
+
+    // ---------------------------------------------------------- que já vêm
+
+    /// <summary>Os temas que viajam com o app, em &lt;pasta do exe&gt;\themes.</summary>
+    private static string PastaDosPadroes =>
+        Path.Combine(AppContext.BaseDirectory, "themes");
+
+    /// <summary>Ids já semeados alguma vez. Uma linha por id.</summary>
+    private static string Registro =>
+        Path.Combine(Configuracao.Pasta, "padroes-semeados.txt");
+
+    /// <summary>
+    /// Copia para a biblioteca os temas que vêm com o app, uma única vez cada.
+    /// </summary>
+    /// <remarks>
+    /// O registro é o que faz isto ser semeadura e não restauração: sem ele, um
+    /// tema apagado de propósito voltaria no boot seguinte, e não haveria como
+    /// se livrar dele. Com ele, o id fica marcado para sempre — sai quem quiser
+    /// que saia, e uma versão nova ainda consegue trazer tema novo, porque o id
+    /// novo não está na lista.
+    ///
+    /// A mídia NÃO é copiada: o <see cref="Personalizado.Arquivo"/> aponta para
+    /// a pasta de instalação. São 23 MB que já estão no disco, e duplicar por
+    /// perfil de usuário não compra nada. O preço é o tema virar órfão se o app
+    /// for desinstalado, que é justamente a hora em que ele deixa de importar.
+    /// </remarks>
+    public static (int lidos, int novos) SemearPadroes()
+    {
+        int lidos = 0;
+
+        try
+        {
+            if (!Directory.Exists(PastaDosPadroes)) return (0, 0);
+
+            var jaFoi = File.Exists(Registro)
+                ? File.ReadAllLines(Registro).Where(l => l.Length > 0).ToHashSet()
+                : new HashSet<string>();
+
+            // Também por NOME, e não só por id: quem usou a importação do
+            // SmartMonitor já tem "Amber Ring" na biblioteca, com id próprio.
+            // Sem esta checagem a atualização entregaria tudo em dobro.
+            var jaTem = Listar().Select(t => t.Nome).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            int novos = 0;
+
+            foreach (var pasta in Directory.GetDirectories(PastaDosPadroes))
+            {
+                string manifesto = Path.Combine(pasta, "theme.json");
+                if (!File.Exists(manifesto)) continue;
+
+                Personalizado? p;
+                try { p = JsonSerializer.Deserialize<Personalizado>(File.ReadAllText(manifesto), Opcoes); }
+                catch { continue; }
+
+                if (p is null || p.Id.Length == 0) continue;
+                lidos++;
+
+                // O Add marca o id como semeado mesmo quando o nome já existe:
+                // é uma decisão tomada, não uma pendência para o próximo boot.
+                bool inedito = jaFoi.Add(p.Id);
+                if (!inedito || jaTem.Contains(p.Nome)) continue;
+
+                // No manifesto o Arquivo é só o nome, para o pacote não depender
+                // de onde o app foi instalado.
+                p.Arquivo = Path.Combine(pasta, p.Arquivo);
+                if (!File.Exists(p.Arquivo)) continue;
+
+                Directory.CreateDirectory(Pasta);
+
+                string miniatura = Path.Combine(pasta, "thumb.png");
+                if (File.Exists(miniatura))
+                    File.Copy(miniatura, Path.Combine(Pasta, p.Id + ".png"), true);
+
+                File.WriteAllText(Path.Combine(Pasta, p.Id + ".json"),
+                                  JsonSerializer.Serialize(p, Opcoes));
+                novos++;
+            }
+
+            Directory.CreateDirectory(Configuracao.Pasta);
+            File.WriteAllLines(Registro, jaFoi);
+
+            return (lidos, novos);
+        }
+        catch
+        {
+            // Tema que já vem é conveniência: falhar aqui não pode impedir o app
+            // de abrir com a biblioteca que a pessoa montou.
+            return (lidos, 0);
+        }
+    }
 }

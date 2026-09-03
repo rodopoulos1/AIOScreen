@@ -172,13 +172,36 @@ def desenhar(tema, marcarLimite):
     return Image.composite(img, Image.new('RGB', (LADO, LADO), (14, 12, 12)), mascara), faltando
 
 
+def doPacote():
+    """
+    Os temas de themes/, que sao os que de fato viajam com o app.
+
+    A galeria do README sai daqui e nao da biblioteca da maquina: sao coisas
+    diferentes — a biblioteca tem tema de teste, e um tema tirado do pacote
+    continuaria aparecendo na imagem.
+    """
+    pacote = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'themes')
+    for manifesto in sorted(glob.glob(os.path.join(pacote, '*', 'theme.json'))):
+        t = json.load(open(manifesto, encoding='utf-8'))
+        t['Arquivo'] = os.path.join(os.path.dirname(manifesto), t['Arquivo'])
+        yield t
+
+
 def main():
     marcarLimite = '--limite' in sys.argv
-    saida = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'previa-temas.png')
+    pacote = '--pacote' in sys.argv
+
+    raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    saida = os.path.join(raiz, 'temas-do-pacote.png' if pacote else 'previa-temas.png')
+
+    if pacote:
+        fonteDosTemas = sorted(doPacote(), key=lambda t: t.get('Nome', '').lower())
+    else:
+        fonteDosTemas = [json.load(open(f, encoding='utf-8'))
+                         for f in sorted(glob.glob(os.path.join(TEMAS, '*.json')))]
 
     itens = []
-    for f in sorted(glob.glob(os.path.join(TEMAS, '*.json'))):
-        t = json.load(open(f, encoding='utf-8'))
+    for t in fonteDosTemas:
         img, faltando = desenhar(t, marcarLimite)
         itens.append((t.get('Nome', '?'), img, faltando))
 
@@ -187,8 +210,13 @@ def main():
     folha = Image.new('RGB', (col * (lado + 6) + 6, lin * (lado + marg + 6) + 6), (16, 14, 14))
     d = ImageDraw.Draw(folha)
 
+    # Ultima fileira incompleta vai centralizada: 13 temas em cinco colunas
+    # deixam dois buracos, e encostados a esquerda a imagem fica torta.
+    naUltima = len(itens) - (lin - 1) * col
+    recuo = (col - naUltima) * (lado + 6) // 2 if naUltima < col else 0
+
     for i, (nome, img, faltando) in enumerate(itens):
-        x = 6 + (i % col) * (lado + 6)
+        x = 6 + (i % col) * (lado + 6) + (recuo if i // col == lin - 1 else 0)
         y = 6 + (i // col) * (lado + marg + 6)
         d.text((x + 2, y + 5), nome + ('   SEM FUNDO' if faltando else ''),
                fill=(255, 90, 90) if faltando else (235, 225, 220), font=fonte(15))

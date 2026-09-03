@@ -23,6 +23,7 @@ If any of these matches what you are dealing with, you are in the right place:
 | **The screen is frozen on one frame** and the GIF won't animate | correct theme container, verified byte-for-byte against real captures |
 | **The app keeps asking for administrator** every single launch | reopens itself elevated through the scheduled task, silently |
 | **SmartMonitorX28 is abandoned** — no updates, rigid editor, no source | open source, drag-and-drop editor, and the protocol is documented |
+| **You want to keep the themes** you already use | 13 come with it, most of them SmartMonitorX28's own artwork, plus an importer for the rest |
 | You want to know **what the vendor software is actually sending** | [`docs/protocol.md`](docs/protocol.md) — the whole wire format |
 
 Not on the list? [Open an issue](../../issues) with your cooler model.
@@ -43,6 +44,40 @@ RAM and temperature readings sit under the preview.
 The editor: drag elements around, grab the handles to resize, double-click text
 to edit it in place, reorder as layers. The canvas is the real 480 × 480 panel,
 circular mask and all — what you see is what gets sent.
+
+## 13 themes, ready to send
+
+![The 13 themes AIOScreen ships with](https://dev.rodopoulos.xyz/imagens/aioscreen/aioscreen-themes-2026-09-03.png)
+
+They are installed on first run and appear in the dropdown straight away — no
+import step, nothing to download. Every one of them is a normal theme: open it
+in the editor and move, recolour or delete anything.
+
+**Most of the artwork comes from SmartMonitorX28's own theme pack** — the same
+animations the vendor software ships with, so that switching to AIOScreen does
+not mean losing the screen you already had. The layouts are not: each one was
+rebuilt around its own image instead of dropping the same gauge cluster on top
+of everything.
+
+That distinction is the point. The stock arrangement puts a big number dead
+centre with two arcs around it, which suits busy artwork and ruins the rest — it
+lands on the dog's face, draws an arc over art that already *is* a ring, and
+dims a landscape that only needed a clock. So:
+
+- **Ring artwork** (Amber Ring, Blue Halo, Magenta Ring, Plasma Ring) has no
+  arcs at all. The art is the gauge; the empty middle takes the number
+- **Artwork with a subject** (Corgi, Raccoon) keeps its middle clear
+- **Landscapes** (Pastel Peaks, Snowfall) read the clock in dark ink against the
+  sky instead of white-on-pale, and are not dimmed
+- **Only Cyber City** gets the full arrangement, because it is the only one busy
+  enough to carry it
+
+If you already imported these from SmartMonitorX28, they are not installed twice
+— matching by name, the copy you already have wins.
+
+> The bundled artwork belongs to its original authors and is included for
+> compatibility with the panel it was made for. If you hold rights to any of it
+> and want it removed, [open an issue](../../issues) and it comes out.
 
 ---
 
@@ -73,6 +108,8 @@ the next person does not have to start over.
   a clock, a date or free text. Drag to move, grab the handles to resize, edit
   text in place, reorder as layers, snap to a grid
 - **Four shapes** per element: number, arc, bar and ring
+- **13 themes included**, installed on first run — most of the artwork is
+  SmartMonitorX28's own, so nothing is lost by switching
 - **Saved themes** with thumbnails — pick one and send it
 - **The preview is live** — same renderer as the panel, same pixels, updating
   every second. What you see is what gets sent

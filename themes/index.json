@@ -1,0 +1,80 @@
+[
+  {
+    "id": "std-amber-ring",
+    "name": "Amber Ring",
+    "folder": "amber-ring",
+    "frames": 48
+  },
+  {
+    "id": "std-blue-halo",
+    "name": "Blue Halo",
+    "folder": "blue-halo",
+    "frames": 98
+  },
+  {
+    "id": "std-corgi",
+    "name": "Corgi",
+    "folder": "corgi",
+    "frames": 100
+  },
+  {
+    "id": "std-cyber-city",
+    "name": "Cyber City",
+    "folder": "cyber-city",
+    "frames": 69
+  },
+  {
+    "id": "std-magenta-ring",
+    "name": "Magenta Ring",
+    "folder": "magenta-ring",
+    "frames": 48
+  },
+  {
+    "id": "std-neon-drive",
+    "name": "Neon Drive",
+    "folder": "neon-drive",
+    "frames": 1
+  },
+  {
+    "id": "std-neon-drive-2",
+    "name": "Neon Drive 2",
+    "folder": "neon-drive-2",
+    "frames": 1
+  },
+  {
+    "id": "std-pastel-peaks",
+    "name": "Pastel Peaks",
+    "folder": "pastel-peaks",
+    "frames": 99
+  },
+  {
+    "id": "std-plasma-ring",
+    "name": "Plasma Ring",
+    "folder": "plasma-ring",
+    "frames": 77
+  },
+  {
+    "id": "std-porthole",
+    "name": "Porthole",
+    "folder": "porthole",
+    "frames": 74
+  },
+  {
+    "id": "std-raccoon",
+    "name": "Raccoon",
+    "folder": "raccoon",
+    "frames": 1
+  },
+  {
+    "id": "std-snowfall",
+    "name": "Snowfall",
+    "folder": "snowfall",
+    "frames": 106
+  },
+  {
+    "id": "std-sound-wave",
+    "name": "Sound Wave",
+    "folder": "sound-wave",
+    "frames": 65
+  }
+]

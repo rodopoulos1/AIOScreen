@@ -1,0 +1,59 @@
+{
+  "Id": "std-corgi",
+  "Nome": "Corgi",
+  "Arquivo": "corgi_0.jpg",
+  "Criado": "2026-01-01T21:00:00",
+  "Modo": "Animacao",
+  "Widgets": [
+    {
+      "Forma": "Arco",
+      "Fonte": "CpuUso",
+      "X": 240,
+      "Y": 240,
+      "Tamanho": 186,
+      "Cor": "FF7A3D",
+      "ComRotulo": true,
+      "Contorno": 0,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    },
+    {
+      "Forma": "Arco",
+      "Fonte": "GpuUso",
+      "X": 240,
+      "Y": 240,
+      "Tamanho": 186,
+      "Cor": "4DD2FF",
+      "ComRotulo": true,
+      "Contorno": 0,
+      "Texto": "",
+      "ArcoInicio": 200,
+      "ArcoVarredura": 140,
+      "Espessura": 15
+    },
+    {
+      "Forma": "Numero",
+      "Fonte": "Hora",
+      "X": 240,
+      "Y": 92,
+      "Tamanho": 34,
+      "Cor": "FFFFFF",
+      "ComRotulo": false,
+      "Contorno": 3,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    }
+  ],
+  "Escurecer": 0.0,
+  "QualidadeJpeg": 85,
+  "QuadrosAoVivo": 1,
+  "IntervaloSegundos": 3,
+  "Zoom": 1,
+  "DeslocamentoX": 0,
+  "DeslocamentoY": 0,
+  "Cobrir": true
+}

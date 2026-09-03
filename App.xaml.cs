@@ -179,6 +179,18 @@ public partial class App : Application
             return;
         }
 
+        // Semeia e sai, sem abrir janela. Fica ANTES da trava de instância de
+        // propósito: é assim que dá para conferir os temas que já vêm sem
+        // fechar o app que estiver rodando.
+        if (e.Args.Contains("--semear"))
+        {
+            var r = Core.Biblioteca.SemearPadroes();
+            Console.WriteLine($"pacote: {r.lidos} lido(s)   semeados agora: {r.novos}");
+            Console.WriteLine($"biblioteca: {Core.Biblioteca.Listar().Count}");
+            Environment.Exit(0);
+            return;
+        }
+
         if (e.Args.Contains("--previa"))
         {
             int i = Array.IndexOf(e.Args, "--previa");
@@ -227,6 +239,12 @@ public partial class App : Application
         // Antes de qualquer janela existir: elas se traduzem no Loaded, e o
         // idioma precisa estar decidido até lá.
         Localization.Idioma.Definir(Core.Configuracao.Carregar().Idioma);
+
+        // Também antes da janela: ela monta a lista de temas no Loaded, e um
+        // tema semeado depois disso só apareceria no próximo arranque.
+        var padroes = Core.Biblioteca.SemearPadroes();
+        if (padroes.novos > 0)
+            Core.Diario.Escrever($"temas que ja vem: {padroes.novos} de {padroes.lidos} adicionado(s)");
 
         base.OnStartup(e);
 

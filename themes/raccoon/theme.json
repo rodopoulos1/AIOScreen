@@ -1,0 +1,31 @@
+{
+  "Id": "std-raccoon",
+  "Nome": "Raccoon",
+  "Arquivo": "raccoon.gif",
+  "Criado": "2026-01-01T12:00:00",
+  "Modo": "Animacao",
+  "Widgets": [
+    {
+      "Forma": "Numero",
+      "Fonte": "Hora",
+      "X": 240,
+      "Y": 404,
+      "Tamanho": 32,
+      "Cor": "FFFFFF",
+      "ComRotulo": false,
+      "Contorno": 3,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    }
+  ],
+  "Escurecer": 0.0,
+  "QualidadeJpeg": 85,
+  "QuadrosAoVivo": 1,
+  "IntervaloSegundos": 3,
+  "Zoom": 1,
+  "DeslocamentoX": 0,
+  "DeslocamentoY": 0,
+  "Cobrir": true
+}

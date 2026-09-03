@@ -57,4 +57,14 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Os temas que ja vem com o app. O Biblioteca.SemearPadroes os procura em
+         <pasta do exe>\themes, e o Personalizado.Arquivo aponta para ca — a
+         midia NAO e copiada para o perfil do usuario. -->
+    <Content Include="themes\**\*" Condition="Exists('themes')">
+      <Link>themes\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

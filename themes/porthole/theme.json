@@ -1,0 +1,59 @@
+{
+  "Id": "std-porthole",
+  "Nome": "Porthole",
+  "Arquivo": "porthole_0.jpg",
+  "Criado": "2026-01-01T13:00:00",
+  "Modo": "Animacao",
+  "Widgets": [
+    {
+      "Forma": "Numero",
+      "Fonte": "Hora",
+      "X": 240,
+      "Y": 148,
+      "Tamanho": 40,
+      "Cor": "FFFFFF",
+      "ComRotulo": false,
+      "Contorno": 3,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    },
+    {
+      "Forma": "Numero",
+      "Fonte": "CpuTemp",
+      "X": 172,
+      "Y": 330,
+      "Tamanho": 28,
+      "Cor": "FFFFFF",
+      "ComRotulo": true,
+      "Contorno": 2,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    },
+    {
+      "Forma": "Numero",
+      "Fonte": "GpuTemp",
+      "X": 308,
+      "Y": 330,
+      "Tamanho": 28,
+      "Cor": "FFFFFF",
+      "ComRotulo": true,
+      "Contorno": 2,
+      "Texto": "",
+      "ArcoInicio": 160,
+      "ArcoVarredura": -140,
+      "Espessura": 15
+    }
+  ],
+  "Escurecer": 0.1,
+  "QualidadeJpeg": 85,
+  "QuadrosAoVivo": 1,
+  "IntervaloSegundos": 3,
+  "Zoom": 1,
+  "DeslocamentoX": 0,
+  "DeslocamentoY": 0,
+  "Cobrir": true
+}
