@@ -109,11 +109,11 @@ public static class Compositor
 
         if (temRotulo)
         {
-            Texto(ctx, w.Rotulo, corpoDoRotulo, Rotulo, w.X, topo);
+            Texto(ctx, w.Rotulo, corpoDoRotulo, Rotulo, w.X, topo, w.Contorno);
             topo += alturaDoRotulo;
         }
 
-        Texto(ctx, valor, w.Tamanho, cor, w.X, topo);
+        Texto(ctx, valor, w.Tamanho, cor, w.X, topo, w.Contorno);
     }
 
     private static void Arco(IImageProcessingContext ctx, Widget w, Leitura l)
@@ -209,7 +209,7 @@ public static class Compositor
     }
 
     private static void Texto(IImageProcessingContext ctx, string s, float tamanho, Color cor,
-                              float x, float topo)
+                              float x, float topo, float contorno)
     {
         var opcoes = new RichTextOptions(Tipografia(tamanho))
         {
@@ -218,12 +218,17 @@ public static class Compositor
             VerticalAlignment = VerticalAlignment.Top,
         };
 
-        // Contorno proporcional ao corpo. Não é enfeite: sem ele o texto some
-        // quando a imagem de fundo é clara, e a imagem quem escolhe é a pessoa.
-        // Fixo, engrossava demais o texto miúdo.
-        float contorno = Math.Max(1.5f, tamanho * 0.05f);
+        var tinta = new SolidBrush(cor);
 
-        ctx.DrawText(opcoes, s, new SolidBrush(cor),
-                     new SolidPen(Color.Black.WithAlpha(0.72f), contorno));
+        // Sem contorno é o padrão. Ele resolve um problema real — texto claro
+        // sobre fundo claro some — mas quem decide é quem monta o tema, e antes
+        // isso era imposto e invisível no editor.
+        if (contorno <= 0)
+        {
+            ctx.DrawText(opcoes, s, tinta);
+            return;
+        }
+
+        ctx.DrawText(opcoes, s, tinta, new SolidPen(Color.Black.WithAlpha(0.72f), contorno));
     }
 }

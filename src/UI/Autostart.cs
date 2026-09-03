@@ -42,6 +42,21 @@ public static class Autostart
         return r.codigo == 0;
     }
 
+    /// <summary>
+    /// Sobe o app pela tarefa agendada, que já é elevada.
+    /// </summary>
+    /// <remarks>
+    /// A tarefa foi criada com RunLevel=Highest, e o Agendador NÃO passa pelo
+    /// UAC — é exatamente para isso que ela existe. O instalador pediu permissão
+    /// UMA vez para o programa nunca mais precisar pedir.
+    ///
+    /// Sem isto, abrir pelo atalho dava um processo sem privilégio, e sem
+    /// privilégio o driver de sensores não carrega: a temperatura da CPU some e
+    /// vira "--", sem nada na tela explicando o porquê.
+    /// </remarks>
+    public static bool SubirPelaTarefa()
+        => Rodar($"/run /tn \"{NomeDaTarefa}\"").codigo == 0;
+
     public static bool Elevado()
     {
         try

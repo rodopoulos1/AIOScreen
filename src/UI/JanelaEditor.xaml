@@ -233,6 +233,19 @@
                                         Minimum="2" Maximum="40" TickFrequency="1"
                                         ValueChanged="AoMudarEspessura" />
 
+                                <Grid Margin="0,8,0,0">
+                                    <TextBlock Text="Contorno" Style="{StaticResource Corpo}"
+                                               Foreground="{StaticResource Texto}" />
+                                    <TextBlock x:Name="ValorContorno" Style="{StaticResource Corpo}"
+                                               HorizontalAlignment="Right" />
+                                </Grid>
+                                <Slider x:Name="Contorno" Style="{StaticResource Deslizante}"
+                                        Minimum="0" Maximum="12" TickFrequency="1"
+                                        ValueChanged="AoMudarContorno" />
+                                <TextBlock Style="{StaticResource Corpo}" FontSize="11"
+                                           Foreground="{StaticResource Apagado}" TextWrapping="Wrap"
+                                           Text="Traço escuro em volta da letra. Zero deixa sem. Serve para o texto claro não sumir em cima de fundo claro." />
+
                                 <TextBlock Text="Cor" Style="{StaticResource Etiqueta}" Margin="0,14,0,7" />
                                 <ItemsControl x:Name="Paleta2">
                                     <ItemsControl.ItemsPanel>

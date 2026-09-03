@@ -57,6 +57,20 @@ public sealed class Widget
     /// <summary>Mostra "CPU", "GPU" e afins acima do número.</summary>
     public bool ComRotulo { get; set; } = true;
 
+    /// <summary>
+    /// Grossura do contorno preto do texto, em pixels. Zero = sem contorno.
+    /// </summary>
+    /// <remarks>
+    /// Era fixo e proporcional ao corpo da letra, e nem aparecia no editor — o
+    /// desenho só ganhava borda ao ir para o painel, o que quebrava a promessa
+    /// de que a mesa mostra o resultado.
+    ///
+    /// Padrão ZERO, por decisão do dono do projeto. O contorno tem uma razão de
+    /// ser (sobre fundo claro o texto some), mas isso é escolha de quem monta o
+    /// tema, não imposição.
+    /// </remarks>
+    public float Contorno { get; set; }
+
     /// <summary>Só para <see cref="Fonte.TextoLivre"/>.</summary>
     public string Texto { get; set; } = "";
 

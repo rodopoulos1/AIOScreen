@@ -1,3 +1,4 @@
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
@@ -46,6 +47,82 @@ public partial class App : Application
         return true;
     }
 
+    /// <summary>
+    /// Sem privilégio, reabre a si mesmo pela tarefa agendada e devolve true.
+    /// </summary>
+    /// <remarks>
+    /// A tarefa foi criada pelo instalador com RunLevel=Highest, e o Agendador
+    /// do Windows não passa pelo UAC. É a peça que faz a promessa se cumprir:
+    /// o instalador pede permissão UMA vez, e o programa nunca mais pede.
+    ///
+    /// Sem isto, abrir pelo atalho do menu Iniciar dava um processo sem
+    /// privilégio — e sem privilégio o LibreHardwareMonitor não carrega o
+    /// driver, a temperatura da CPU vira "--" e nada na tela diz por quê.
+    ///
+    /// A trava de instância é solta ANTES de chamar a tarefa: o processo novo
+    /// tropeçaria nela e morreria em silêncio.
+    /// </remarks>
+    private bool SubirElevadoPelaTarefa()
+    {
+        if (UI.Autostart.Elevado()) return false;
+        if (!UI.Autostart.Instalado()) return false;
+        if (AcabouDeTentar()) return false;
+
+        try { _trava?.ReleaseMutex(); } catch { }
+        _trava?.Dispose();
+        _trava = null;
+
+        if (!UI.Autostart.SubirPelaTarefa())
+        {
+            // Falhou: seguimos sem privilégio mesmo, que é melhor do que não
+            // abrir. A trava volta para o lugar.
+            _trava = new Mutex(initiallyOwned: true, @"Global\AIOScreen_instancia_unica", out _);
+            return false;
+        }
+
+        // A tarefa sobe com --minimizado, porque o uso normal dela é o logon.
+        // Quem clicou no atalho quer VER a janela, então ela é chamada à frente
+        // assim que aparece.
+        for (int i = 0; i < 60; i++)
+        {
+            var janela = FindWindow(null, "AIOScreen");
+            if (janela != IntPtr.Zero)
+            {
+                PostMessage(janela, WM_MOSTRAR, IntPtr.Zero, IntPtr.Zero);
+                break;
+            }
+            Thread.Sleep(100);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Trava contra laço: se a tarefa não elevar, um processo chamaria o outro
+    /// para sempre. Duas tentativas em 30 s já é sinal de que algo não vai.
+    /// </summary>
+    private static bool AcabouDeTentar()
+    {
+        try
+        {
+            var marca = Path.Combine(Core.Configuracao.Pasta, "subindo.marca");
+
+            if (File.Exists(marca)
+                && DateTime.UtcNow - File.GetLastWriteTimeUtc(marca) < TimeSpan.FromSeconds(30))
+                return true;
+
+            Directory.CreateDirectory(Core.Configuracao.Pasta);
+            File.WriteAllText(marca, "");
+            return false;
+        }
+        catch
+        {
+            // Sem poder marcar, é mais seguro NÃO tentar: um laço de processos
+            // é pior do que abrir sem privilégio.
+            return true;
+        }
+    }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         if (e.Args.Contains("--autoteste"))
@@ -79,6 +156,12 @@ public partial class App : Application
         // Depois dos modos de linha de comando, que são de vida curta e podem
         // rodar em paralelo com a janela.
         if (JaEstaAberto())
+        {
+            Shutdown();
+            return;
+        }
+
+        if (SubirElevadoPelaTarefa())
         {
             Shutdown();
             return;

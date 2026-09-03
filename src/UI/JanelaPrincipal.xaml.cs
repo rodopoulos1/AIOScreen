@@ -133,6 +133,35 @@ public partial class JanelaPrincipal : Window
                                : T("Tela não encontrada"));
     }
 
+    /// <summary>
+    /// Atende o pedido de "aparece aí" mandado por outra instância.
+    /// </summary>
+    /// <remarks>
+    /// O App já postava esta mensagem em dois lugares — ao abrir o app com um
+    /// já aberto, e ao subir de novo elevado pela tarefa — mas NINGUÉM a
+    /// escutava. O efeito era clicar no atalho e não acontecer nada.
+    /// </remarks>
+    private const int WM_MOSTRAR = 0x0400 + 0x51;
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+
+        var origem = System.Windows.Interop.HwndSource.FromHwnd(
+            new System.Windows.Interop.WindowInteropHelper(this).Handle);
+
+        origem?.AddHook((IntPtr h, int msg, IntPtr w, IntPtr l, ref bool tratada) =>
+        {
+            if (msg != WM_MOSTRAR) return IntPtr.Zero;
+
+            Show();
+            WindowState = WindowState.Normal;
+            Activate();
+            tratada = true;
+            return IntPtr.Zero;
+        });
+    }
+
     private void AoCarregar(object? remetente, RoutedEventArgs e)
     {
         Localization.Traduzir.Janela(this);

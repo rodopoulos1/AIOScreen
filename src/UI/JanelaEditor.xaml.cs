@@ -362,40 +362,66 @@ public partial class JanelaEditor : Window
 
         if (temRotulo)
         {
-            yield return Texto(w.Rotulo, corpoRotulo, RotuloCinza, w.X, topo);
+            yield return Texto(w.Rotulo, corpoRotulo, RotuloCinza, w.X, topo, w.Contorno);
             topo += alturaRotulo;
         }
 
-        yield return Texto(w.Valor(_amostra), w.Tamanho, cor, w.X, topo);
+        yield return Texto(w.Valor(_amostra), w.Tamanho, cor, w.X, topo, w.Contorno);
     }
 
     private static readonly Brush RotuloCinza = new SolidColorBrush(Color.FromRgb(0xC9, 0xBF, 0xBC));
 
-    private TextBlock Texto(string s, double corpo, Brush cor, double x, double topo)
+    private static readonly FontFamily FonteDoPainel =
+        new("Bahnschrift SemiBold, Bahnschrift, Segoe UI Semibold, Arial");
+
+    /// <summary>
+    /// Desenha texto igual ao <see cref="Compositor"/> — inclusive o contorno.
+    /// </summary>
+    /// <remarks>
+    /// Antes daqui saía um TextBlock com sombra BORRADA, enquanto o painel
+    /// recebia um traço DURO. Eram dois desenhos diferentes da mesma coisa, e a
+    /// mesa deixava de mostrar o resultado: a borda aparecia só depois de
+    /// enviar. Com contorno, o texto vira geometria e ganha o mesmo traço.
+    /// </remarks>
+    private UIElement Texto(string s, double corpo, Brush cor, double x, double topo, double contorno)
     {
-        var t = new TextBlock
+        if (contorno <= 0)
         {
-            Text = s,
-            FontFamily = new FontFamily("Bahnschrift SemiBold, Bahnschrift, Segoe UI Semibold, Arial"),
-            FontWeight = FontWeights.Bold,
-            FontSize = corpo,
-            Foreground = cor,
+            var t = new TextBlock
+            {
+                Text = s,
+                FontFamily = FonteDoPainel,
+                FontWeight = FontWeights.Bold,
+                FontSize = corpo,
+                Foreground = cor,
+                IsHitTestVisible = false,
+            };
+
+            // O ImageSharp centraliza no X e alinha pelo topo em Y. Aqui é
+            // preciso medir para reproduzir isso — o Canvas posiciona pelo canto.
+            t.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            Canvas.SetLeft(t, x - t.DesiredSize.Width / 2);
+            Canvas.SetTop(t, topo);
+            return t;
+        }
+
+        var escrita = new FormattedText(
+            s, System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
+            new Typeface(FonteDoPainel, FontStyles.Normal, FontWeights.Bold, FontStretches.Normal),
+            corpo, cor, VisualTreeHelper.GetDpi(this).PixelsPerDip);
+
+        var desenho = new Path
+        {
+            Data = escrita.BuildGeometry(new Point(0, 0)),
+            Fill = cor,
+            Stroke = new SolidColorBrush(Color.FromArgb(184, 0, 0, 0)),   // 0,72 de alfa
+            StrokeThickness = contorno,
             IsHitTestVisible = false,
         };
 
-        // O ImageSharp desenha o texto centralizado no X e alinhado pelo topo em
-        // Y. Aqui é preciso medir para reproduzir isso — o Canvas do WPF
-        // posiciona pelo canto.
-        t.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        Canvas.SetLeft(t, x - t.DesiredSize.Width / 2);
-        Canvas.SetTop(t, topo);
-
-        t.Effect = new System.Windows.Media.Effects.DropShadowEffect
-        {
-            Color = Colors.Black, BlurRadius = 4, ShadowDepth = 0, Opacity = 0.9,
-        };
-
-        return t;
+        Canvas.SetLeft(desenho, x - escrita.Width / 2);
+        Canvas.SetTop(desenho, topo);
+        return desenho;
     }
 
     private Path PintarArco(Widget w, double inicioGraus, double varreduraGraus, Brush cor)
@@ -759,8 +785,14 @@ public partial class JanelaEditor : Window
         if (achado is null) return;
 
         // Arco e anel são concêntricos por definição: arrastar não faz sentido,
-        // o raio é que muda.
-        if (achado.Forma is Forma.Arco or Forma.Anel) return;
+        // o raio é que muda. Só que "não acontece nada" ao arrastar parece
+        // defeito — então o motivo aparece escrito.
+        if (achado.Forma is Forma.Arco or Forma.Anel)
+        {
+            Rodape.Text = Idioma.T(
+                "Arco e anel giram em volta do centro da tela: não se movem. Use as alças para mudar o raio, e a espessura para a grossura.");
+            return;
+        }
 
         _arrastando = true;
         _agarrouEm = p;
@@ -1083,6 +1115,12 @@ public partial class JanelaEditor : Window
         Espessura.Value = Math.Clamp(w.Espessura, 2, 40);
         ValorEspessura.Text = Espessura.IsEnabled ? ((int)w.Espessura).ToString() : "—";
 
+        // Contorno só existe em texto: arco, anel e barra não têm letra.
+        bool temLetra = w.Forma == Forma.Numero;
+        Contorno.IsEnabled = temLetra;
+        Contorno.Value = Math.Clamp(w.Contorno, 0, 12);
+        ValorContorno.Text = temLetra ? ((int)w.Contorno).ToString() : "—";
+
         ComRotulo.IsEnabled = ehTexto && w.Rotulo.Length > 0;
         ComRotulo.IsChecked = w.ComRotulo;
 
@@ -1114,6 +1152,14 @@ public partial class JanelaEditor : Window
         if (_montando || _escolhido is null) return;
         _escolhido.Espessura = (float)Espessura.Value;
         ValorEspessura.Text = ((int)Espessura.Value).ToString();
+        RedesenharTudo();
+    }
+
+    private void AoMudarContorno(object remetente, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_montando || _escolhido is null) return;
+        _escolhido.Contorno = (float)Contorno.Value;
+        ValorContorno.Text = ((int)Contorno.Value).ToString();
         RedesenharTudo();
     }
 
