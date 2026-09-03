@@ -40,10 +40,16 @@ jobs:
           dotnet build AIOScreen.csproj -c Debug
           ./bin/Debug/net8.0-windows/AIOScreen.exe --autoteste
 
-      # Not preinstalled on the runner. Version 6 specifically: 5 does not
-      # understand part of the script, and 7 moves the install folder.
-      - name: Install Inno Setup 6
-        run: choco install innosetup --version=6.2.2 -y --no-progress
+      # The runner already ships an Inno Setup 6, and choco refuses to install
+      # an older one over it — pinning a patch version failed the release for a
+      # reason that had nothing to do with this project. Install only if the
+      # tool is genuinely missing, and let gerar-instalador.ps1 locate it.
+      - name: Install Inno Setup 6 if missing
+        shell: pwsh
+        run: |
+          if (Get-Command ISCC.exe -ErrorAction SilentlyContinue) { exit 0 }
+          if (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe") { exit 0 }
+          choco install innosetup -y --no-progress
 
       - name: Publish and compile the installer
         shell: pwsh

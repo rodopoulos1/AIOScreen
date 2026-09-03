@@ -15,16 +15,32 @@ $raiz = Split-Path $PSScriptRoot
 $publicado = Join-Path $raiz 'published'
 $saida = Join-Path $raiz 'installer-output'
 
-# O Inno Setup 6 é o que o script usa. A 5 não entende parte da sintaxe, e a 7
-# muda o nome da pasta — por isso a procura é explícita.
+# O Inno Setup 6 é o que o script usa: a 5 não entende parte da sintaxe.
+#
+# A procura vai além dos dois caminhos padrão porque o runner do GitHub já traz
+# uma 6.x instalada, e a versão dela muda sem aviso. Fixar caminho — ou fixar
+# número de versão no choco — quebra o release por um motivo que não tem nada a
+# ver com o projeto.
 $iscc = @(
     "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
     "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
 ) | Where-Object { Test-Path $_ } | Select-Object -First 1
 
 if (-not $iscc) {
+    $iscc = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source
+}
+
+if (-not $iscc) {
+    $iscc = Get-ChildItem "${env:ProgramFiles(x86)}\Inno Setup*", "$env:ProgramFiles\Inno Setup*" `
+        -Filter ISCC.exe -Recurse -ErrorAction SilentlyContinue |
+        Select-Object -First 1 -ExpandProperty FullName
+}
+
+if (-not $iscc) {
     throw "Inno Setup 6 não encontrado. Instale com: winget install JRSoftware.InnoSetup"
 }
+
+Write-Host "     Inno Setup: $iscc" -ForegroundColor DarkGray
 
 Write-Host "1/2  publicando em Release..." -ForegroundColor Cyan
 Remove-Item $publicado -Recurse -Force -ErrorAction SilentlyContinue
