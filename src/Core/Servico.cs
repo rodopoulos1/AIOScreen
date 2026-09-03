@@ -405,9 +405,35 @@ public sealed class Servico : IAsyncDisposable
     /// Zero como "nunca apagar" é a convenção do campo; o programa do fabricante
     /// só limita o teto (30) e aceita o zero sem tratar como caso especial.
     /// </remarks>
+    /// <summary>
+    /// Manda um pacote de telemetria com valores escolhidos na mão. Para teste.
+    /// </summary>
+    /// <remarks>
+    /// Existe para responder no hardware uma pergunta que a engenharia reversa
+    /// não respondeu: o que o firmware faz com tempo ZERO — nunca apagar, ou
+    /// apagar agora. Devolve o byte montado para poder ser conferido na tela.
+    /// </remarks>
+    /// <summary>
+    /// Para de mandar telemetria, mantendo a conexão aberta.
+    /// </summary>
+    /// <remarks>
+    /// O tempo de apagar é um temporizador de OCIOSIDADE: o firmware conta desde
+    /// o último pacote recebido. Como o laço manda um por segundo, o contador
+    /// era reiniciado antes de chegar a lugar nenhum.
+    ///
+    /// Confirmado no hardware: mandar tempo 1 sem pausar não apaga; pausando,
+    /// apaga. É por isso que não existe "apagar agora" — para apagar é preciso
+    /// ficar quieto.
+    /// </remarks>
+    public bool TelemetriaPausada { get; set; }
+
     public void ManterAcesa()
     {
         if (!_painel.Ligado) return;
+
+        // Grava no serviço também: se o laço mandar mais um pacote antes de o
+        // app morrer, ele tem que repetir ESTE valor, e não o normal.
+        MinutosParaApagar = 0;
 
         try
         {
@@ -425,6 +451,12 @@ public sealed class Servico : IAsyncDisposable
     public async Task ApagarAsync(TimeSpan? esperaDoPainel = null, CancellationToken ct = default)
     {
         if (!_painel.Ligado) return;
+
+        // Cala o laço ANTES de qualquer coisa. Ele manda telemetria por segundo,
+        // e um único pacote com o tempo normal reiniciaria o contador do painel
+        // e desfaria tudo o que esta função faz. Testado: sem calar, não apaga.
+        TelemetriaPausada = true;
+        MinutosParaApagar = 1;
 
         try
         {
@@ -492,7 +524,12 @@ public sealed class Servico : IAsyncDisposable
                 else
                 {
                     var leitura = _leitor.Ler();
-                    MandarTelemetria(leitura);
+
+                    // Pausado, o painel fica sem receber nada e o temporizador
+                    // de apagar dele finalmente corre. A leitura de sensores
+                    // continua, para a interface não congelar.
+                    if (!TelemetriaPausada) MandarTelemetria(leitura);
+
                     Avisar(Idioma.T("Ligado"), -1, leitura);
 
                     if (Modo == Modo.AoVivo && _fundos.Count > 0 && DateTime.UtcNow >= proximo)

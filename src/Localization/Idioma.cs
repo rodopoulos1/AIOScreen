@@ -170,6 +170,19 @@ public static class Idioma
     /// </remarks>
     public static string Marcar(string portugues) => portugues;
 
+    /// <summary>
+    /// Texto que fica em português de propósito, sem entrar no dicionário.
+    /// </summary>
+    /// <remarks>
+    /// Para controle de diagnóstico, que existe para uma investigação e sai
+    /// depois. Traduzir isso em 23 idiomas seria trabalho jogado fora.
+    ///
+    /// Serve também de declaração: o <c>tools/textos.py</c> reconhece esta
+    /// chamada e para de cobrar tradução da frase. Sem ela, todo texto de tela
+    /// que não passa pelo tradutor aparece na auditoria — que é o certo.
+    /// </remarks>
+    public static string SemTraducao(string portugues) => portugues;
+
     /// <summary>Traduz o molde e depois formata, para a ordem dos argumentos poder mudar por idioma.</summary>
     public static string T(string portugues, params object[] valores)
     {

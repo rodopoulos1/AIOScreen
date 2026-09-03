@@ -169,6 +169,13 @@ Set it to `1` and the backlight dies about a minute after the host stops
 talking. The firmware counts it, so quitting the app or powering the PC down
 does not stop the countdown — which is exactly what makes it work.
 
+**You have to actually stop talking.** The timer is reset by every packet the
+panel receives, and a typical client sends telemetry once per second, so the
+countdown never gets anywhere while the app is running. Confirmed on hardware:
+sending `1` while still streaming does nothing; sending `1` and then going quiet
+turns the backlight off. There is no "off right now" command — going silent *is*
+the command.
+
 Things that do **not** turn the screen off, both tested on hardware:
 
 | Attempt | What actually happens |

@@ -55,10 +55,10 @@ Fora isso, o editor dele é engessado e o programa não recebe atualização.
 - **Sobe com o Windows** por tarefa agendada: elevada, e **sem UAC depois da
   instalação**
 - **Vive na bandeja** ocupando 21 MB de RAM e 0% de CPU
-- **Você escolhe o que acontece ao sair e ao desligar** — deixar a animação
-  tocando no painel, ou apagar a tela. Apagar no desligamento é o padrão, porque
-  foi justamente o painel aceso a noite toda na energia de espera do USB que deu
-  origem a este projeto
+- **Apaga a tela de verdade** ao sair e ao desligar o PC — backlight cortado, não
+  só um quadro preto. É o padrão, porque foi justamente o painel aceso a noite
+  toda na energia de espera do USB que deu origem a este projeto. As duas coisas
+  são opção: dá para deixar a animação tocando, se preferir
 - **24 idiomas**, com troca na hora — sem reiniciar o app
 
 ### Os dois modos de envio

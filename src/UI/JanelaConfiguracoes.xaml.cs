@@ -17,6 +17,7 @@ public partial class JanelaConfiguracoes : Window
     /// <summary>Disparado a cada mudança, para a janela principal aplicar na hora.</summary>
     public event Action? Mudou;
 
+
     public JanelaConfiguracoes(Configuracao cfg, IReadOnlyList<string> gpus)
     {
         InitializeComponent();

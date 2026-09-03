@@ -58,14 +58,14 @@ public sealed class Configuracao
     public byte MinutosParaApagarBacklight { get; set; } = 5;
 
     /// <summary>
-    /// Deixa a tela tocando depois de sair do programa. Ligado por padrão.
+    /// Deixa a tela tocando depois de sair do programa. DESLIGADO por padrão.
     /// </summary>
     /// <remarks>
-    /// Sair de um app não deveria apagar um monitor. No modo Animação o painel
-    /// guarda os quadros e toca sozinho, sem depender de nada no PC — apagar ao
-    /// sair jogaria fora justamente o que esse modo existe para fazer.
+    /// Desmarcado, sair apaga a tela — que é o que se espera de um programa que
+    /// fecha. Marcado, o painel segue tocando a animação sozinho, sem depender
+    /// de nada no PC.
     /// </remarks>
-    public bool ManterTelaAoFechar { get; set; } = true;
+    public bool ManterTelaAoFechar { get; set; }
 
     /// <summary>
     /// Deixa a tela tocando depois de desligar o PC. DESLIGADO por padrão.

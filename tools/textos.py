@@ -33,6 +33,11 @@ CHAMADAS = re.compile(
     r'(?:AIOScreen\.Localization\.Idioma\.(?:T|Marcar)|Localization\.Idioma\.(?:T|Marcar)'
     r'|Idioma\.(?:T|Marcar)|(?<![\w.])T|(?<![\w.])Rodape)\s*\(')
 
+# Texto declarado como "fica em portugues mesmo". Conta como coberto na
+# auditoria, mas NAO entra no dicionario — senao viraria chave faltando nos 23
+# idiomas. Ver Idioma.SemTraducao.
+DISPENSADAS = re.compile(r'(?:Idioma\.)?SemTraducao\s*\(')
+
 LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
 
 # Contextos em que um literal NAO e texto de tela: nome de recurso do WPF e
@@ -132,6 +137,25 @@ def fimDoPrimeiroArgumento(texto, i):
             return i
         i += 1
     return i
+
+
+def varrerDispensadas(texto):
+    # Spans dos literais marcados com SemTraducao: cobertos, nunca extraidos.
+    spans = []
+    for m in DISPENSADAS.finditer(texto):
+        fim = fimDoPrimeiroArgumento(texto, m.end())
+        i = m.end()
+        while i < fim:
+            if texto[i] != '"':
+                i += 1
+                continue
+            arg, depois = grupoDeLiterais(texto, i)
+            if arg is None:
+                i += 1
+                continue
+            spans.append((i, depois))
+            i = depois
+    return spans
 
 
 def varrerCs(texto):
@@ -235,6 +259,7 @@ def auditar():
         conteudo = open(caminho, encoding='utf-8').read()
         cobertos = [(a, b) for _, a, b in varrerCs(conteudo)]
         cobertos += comentarios(conteudo)
+        cobertos += varrerDispensadas(conteudo)
 
         for m in LITERAL.finditer(conteudo):
             if any(a <= m.start() and m.end() <= b for a, b in cobertos):
