@@ -1,0 +1,61 @@
+name: Bug report
+description: Something in AIOScreen behaves wrong
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before anything else: `%LOCALAPPDATA%\AIOScreen\log.txt` records what the
+        app decided at startup and what failed. It is the difference between a
+        fix and a guess. It stays on your machine unless you paste it here —
+        have a look before you do.
+
+  - type: textarea
+    id: oque
+    attributes:
+      label: What happens
+      description: And what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduzir
+    attributes:
+      label: How to reproduce it
+      placeholder: |
+        1. Open a theme
+        2. Click Apply
+        3. ...
+    validations:
+      required: true
+
+  - type: input
+    id: modelo
+    attributes:
+      label: Cooler model
+      placeholder: SuperFrame Isengard Magic 360
+    validations:
+      required: true
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: The last few dozen lines of `%LOCALAPPDATA%\AIOScreen\log.txt`.
+      render: text
+    validations:
+      required: false
+
+  - type: dropdown
+    id: elevado
+    attributes:
+      label: Is CPU temperature showing?
+      description: |
+        A `--` there means the app is running without elevation, and that alone
+        explains a whole class of symptoms.
+      options:
+        - "Yes, a number shows up"
+        - "No, it shows --"
+        - Not sure
+    validations:
+      required: false

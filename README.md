@@ -1,5 +1,9 @@
 # AIOScreen — a SmartMonitorX28 replacement for AIO cooler LCD screens
 
+[![build and checks](https://github.com/rodopoulos1/AIOScreen/actions/workflows/conferir.yml/badge.svg)](https://github.com/rodopoulos1/AIOScreen/actions/workflows/conferir.yml)
+[![Download](https://img.shields.io/github/v/release/rodopoulos1/AIOScreen?label=download&color=c1121f)](../../releases/latest)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20NC-blue)](LICENSE)
+
 **Drive the round LCD on your liquid cooler without the vendor software.**
 
 A full, open replacement for **SmartMonitorX28** — the utility that ships with

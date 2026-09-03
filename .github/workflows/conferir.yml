@@ -1,4 +1,4 @@
-name: build e idiomas
+name: build and checks
 
 on:
   push:
@@ -6,7 +6,8 @@ on:
   pull_request:
 
 jobs:
-  conferir:
+  checks:
+    name: Build, translations and protocol self-test
     runs-on: windows-latest
 
     steps:
@@ -20,30 +21,39 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compilar
+      - name: Build
         run: dotnet build AIOScreen.csproj -c Release
 
-      # Falha quando algum texto de tela nao passa por Idioma.T(). Sem isto a
-      # frase aparece em portugues numa interface traduzida, e so se descobre
-      # olhando print.
-      - name: Nenhum texto fora do tradutor
+      # Fails when a UI string does not go through Idioma.T(). Without this the
+      # phrase shows up in Portuguese inside a translated interface, and the
+      # only way to notice is to look at a screenshot.
+      - name: No UI string bypasses the translator
         run: python tools/textos.py auditar
 
-      # Falha por marcador {0} sumido, curinga de filtro alterado ou sigla
-      # (CPU, GPU, RAM) que virou minuscula na traducao. Marcador a mais estoura
-      # o string.Format em tempo de execucao.
-      - name: Idiomas conferem com a origem
+      # Fails on a missing {0}, an altered file-dialog wildcard, or an acronym
+      # (CPU, GPU, RAM) lowercased by a translation. A stray placeholder throws
+      # a formatting exception at runtime.
+      - name: Languages match the source
         run: python tools/conferir.py
 
-      # A origem e gerada do codigo. Se ela mudar aqui, alguem mexeu num texto
-      # e esqueceu de rodar o extrator — e as 23 traducoes ficaram defasadas.
-      - name: Origem esta em dia com o codigo
+      # The source dictionary is generated from the code. If it changes here,
+      # someone edited a string and forgot to re-extract — leaving all 23
+      # translations behind.
+      - name: Source dictionary is up to date
         shell: bash
         run: |
           python tools/textos.py extrair
           git diff --exit-code languages/pt-BR.json || {
             echo
-            echo 'languages/pt-BR.json esta defasado.'
-            echo 'Rode: python tools/textos.py extrair'
+            echo 'languages/pt-BR.json is stale.'
+            echo 'Run: python tools/textos.py extrair'
             exit 1
           }
+
+      # Compares generated packets against bytes captured from the real wire.
+      # This is what guards the reverse-engineered protocol against a refactor
+      # that looks harmless and silently changes a byte.
+      - name: Protocol self-test against real captures
+        run: |
+          dotnet build AIOScreen.csproj -c Debug
+          ./bin/Debug/net8.0-windows/AIOScreen.exe --autoteste

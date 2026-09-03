@@ -1,0 +1,69 @@
+name: Cooler compatibility report
+description: Tell us whether AIOScreen works with your cooler — working or not, both are useful
+title: "[compat] "
+labels: [compatibility]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is how the compatibility table stops being guesswork. A report that
+        it **did not** work is worth just as much as one that did — it saves the
+        next person the download.
+
+        Not sure yet? Run the check below first; it is the only reliable answer.
+
+  - type: input
+    id: modelo
+    attributes:
+      label: Cooler model
+      description: As printed on the box or the pump block. Include the AIO size.
+      placeholder: SuperFrame Isengard Magic 360
+    validations:
+      required: true
+
+  - type: dropdown
+    id: resultado
+    attributes:
+      label: Did it work?
+      options:
+        - Yes — screen works, images and readings show up
+        - Partly — it connects but something is wrong
+        - "No — the app never found the screen"
+    validations:
+      required: true
+
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware ID
+      description: |
+        Paste the output of this, run in PowerShell. It identifies the
+        controller, which is what actually decides compatibility — not the
+        screen size, and not the cooler brand.
+      value: |
+        Get-CimInstance Win32_PnPEntity -Filter "PNPClass='Ports'" |
+          Select-Object Name, DeviceID
+      render: text
+    validations:
+      required: true
+
+  - type: input
+    id: software
+    attributes:
+      label: What software came with the cooler
+      description: The exact name helps identify rebadges of the same panel.
+      placeholder: SmartMonitorX28
+    validations:
+      required: false
+
+  - type: textarea
+    id: detalhes
+    attributes:
+      label: Anything else
+      description: |
+        If something went wrong, `%LOCALAPPDATA%\AIOScreen\log.txt` records what
+        the app decided at startup. It never leaves your machine unless you
+        paste it here — glance over it first.
+      placeholder: Photo of the screen, what you expected, what happened instead.
+    validations:
+      required: false

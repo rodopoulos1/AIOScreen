@@ -1,0 +1,87 @@
+name: release
+
+# Builds the installer and publishes it. Push a tag to cut a release:
+#
+#     git tag v1.0.0 && git push origin v1.0.0
+#
+# The manual trigger exists to test the build without creating a tag; it
+# uploads the installer as a workflow artifact and publishes nothing.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  installer:
+    name: Build installer
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The same gates as every push. A release that skips them is a release
+      # that ships a UI half in Portuguese, or a protocol byte quietly changed.
+      - name: Translations and protocol
+        run: |
+          python tools/textos.py auditar
+          python tools/conferir.py
+          dotnet build AIOScreen.csproj -c Debug
+          ./bin/Debug/net8.0-windows/AIOScreen.exe --autoteste
+
+      # Not preinstalled on the runner. Version 6 specifically: 5 does not
+      # understand part of the script, and 7 moves the install folder.
+      - name: Install Inno Setup 6
+        run: choco install innosetup --version=6.2.2 -y --no-progress
+
+      - name: Publish and compile the installer
+        shell: pwsh
+        run: ./tools/gerar-instalador.ps1
+
+      - name: Name the artifact after the tag
+        id: nome
+        shell: bash
+        run: |
+          arquivo=$(ls installer-output/*.exe | head -1)
+          echo "caminho=$arquivo" >> "$GITHUB_OUTPUT"
+          echo "nome=$(basename "$arquivo")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.nome.outputs.nome }}
+          path: ${{ steps.nome.outputs.caminho }}
+
+      # Only on a tag. A manual run stops at the artifact above.
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.nome.outputs.caminho }}
+          generate_release_notes: true
+          body: |
+            Download `${{ steps.nome.outputs.nome }}` below and run it.
+
+            Setup asks for administrator **once**. That is what creates the
+            scheduled task that starts AIOScreen elevated — without it, Windows
+            will not let the app read CPU temperature, and it would have to ask
+            every single launch.
+
+            The executable is not code-signed, so SmartScreen will call the
+            publisher unknown on first run. What it touches on your machine is
+            listed in [docs/what-it-touches.md](docs/what-it-touches.md), and
+            the source is right here.
+
+            **Not sure your cooler is compatible?** Run the hardware-ID check in
+            [docs/compatibility.md](docs/compatibility.md) — it takes ten
+            seconds and it is the only reliable answer.

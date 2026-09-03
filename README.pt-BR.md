@@ -1,5 +1,9 @@
 # AIOScreen — substituto do SmartMonitorX28 para telas de water cooler
 
+[![build and checks](https://github.com/rodopoulos1/AIOScreen/actions/workflows/conferir.yml/badge.svg)](https://github.com/rodopoulos1/AIOScreen/actions/workflows/conferir.yml)
+[![Baixar](https://img.shields.io/github/v/release/rodopoulos1/AIOScreen?label=baixar&color=c1121f)](../../releases/latest)
+[![Licença: PolyForm Noncommercial](https://img.shields.io/badge/licen%C3%A7a-PolyForm%20NC-blue)](LICENSE)
+
 **Controle a telinha redonda do seu water cooler sem o software do fabricante.**
 
 Substituto completo e aberto do **SmartMonitorX28** — o programa que vem com o
